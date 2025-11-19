@@ -11,24 +11,30 @@ public class Window {
     private long id;
     private final String title;
     private final Settings settings;
+    private boolean resized;
 
     private final Keyboard keyboardCallback;
     private final Mouse.MouseButtonCallback mouseButtonCallback;
     private final Mouse.CursorPosCallback cursorPosCallback;
+    private final Mouse.ScrollCallback scrollCallback;
+
     private final GLFWWindowSizeCallback windowSizeCallback;
 
     public Window(String title, Settings settings) {
         this.title = title;
         this.settings = settings;
+        this.resized = false;
 
         this.keyboardCallback = new Keyboard();
         this.mouseButtonCallback = new Mouse.MouseButtonCallback();
         this.cursorPosCallback = new Mouse.CursorPosCallback();
+        this.scrollCallback = new Mouse.ScrollCallback();
         this.windowSizeCallback = new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
                 Window.this.settings.setWidth(width);
                 Window.this.settings.setHeight(height);
+                Window.this.resized = true;
                 GL11.glViewport(0, 0, width, height);
             }
         };
@@ -43,7 +49,7 @@ public class Window {
         GLFW.glfwDefaultWindowHints();
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
         GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
-        
+
         long monitor = MemoryUtil.NULL;
         switch (this.settings.getFullscreenMode()) {
             case FULLSCREEN -> {
@@ -71,6 +77,7 @@ public class Window {
         GLFW.glfwSetKeyCallback(this.id, this.keyboardCallback);
         GLFW.glfwSetMouseButtonCallback(this.id, this.mouseButtonCallback);
         GLFW.glfwSetCursorPosCallback(this.id, this.cursorPosCallback);
+        GLFW.glfwSetScrollCallback(this.id, this.scrollCallback);
         GLFW.glfwSetWindowSizeCallback(this.id, this.windowSizeCallback);
 
         GLFW.glfwMakeContextCurrent(this.id);
@@ -81,15 +88,18 @@ public class Window {
         setVsync(this.settings.isVsync());
         GLFW.glfwShowWindow(this.id);
     }
-    
+
     public void setVsync(boolean vsync) {
         this.settings.setVsync(vsync);
         GLFW.glfwSwapInterval(vsync ? 1 : 0);
     }
-    
+
     public void setResolution(int newWidth, int newHeight) {
         GLFW.glfwSetWindowSize(this.id, newWidth, newHeight);
         GL11.glViewport(0, 0, newWidth, newHeight);
+        this.settings.setWidth(newWidth);
+        this.settings.setHeight(newHeight);
+        this.resized = true;
     }
 
     public void update() {
@@ -101,6 +111,7 @@ public class Window {
         this.keyboardCallback.free();
         this.mouseButtonCallback.free();
         this.cursorPosCallback.free();
+        this.scrollCallback.free();
         this.windowSizeCallback.free();
 
         GLFW.glfwDestroyWindow(this.id);
@@ -124,6 +135,14 @@ public class Window {
         return this.id;
     }
 
+    public boolean hasResized() {
+        return resized;
+    }
+
+    public void setResized(boolean resized) {
+        this.resized = resized;
+    }
+
     public int getWidth() {
         return this.settings.getWidth();
     }
@@ -135,7 +154,7 @@ public class Window {
     public String getTitle() {
         return this.title;
     }
-    
+
     public Settings getSettings() {
         return this.settings;
     }
