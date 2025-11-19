@@ -1,0 +1,7 @@
+{
+  "fullscreenMode": "WINDOWED",
+  "width": 1280,
+  "height": 720,
+  "vsync": true,
+  "fpsCap": 60
+}

@@ -1,0 +1,58 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+ext {
+    lwjglVersion = '3.3.6'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+
+    implementation "org.lwjgl:lwjgl"
+    implementation "org.lwjgl:lwjgl-glfw"
+    implementation "org.lwjgl:lwjgl-opengl"
+    implementation "org.lwjgl:lwjgl-openal"
+    implementation "org.lwjgl:lwjgl-stb"
+    implementation "org.joml:joml:1.10.8"
+    implementation "com.google.code.gson:gson:2.10.1"
+}
+
+static def getLwjglNatives() {
+    def osName = System.getProperty("os.name").toLowerCase()
+    def osArch = System.getProperty("os.arch").toLowerCase()
+
+    if (osName.contains("windows")) {
+        return "natives-windows"
+    } else if (osName.contains("linux")) {
+        return "natives-linux"
+    } else if (osName.contains("mac") || osName.contains("osx")) {
+        if (osArch.contains("aarch64") || osArch.contains("arm64")) {
+            return "natives-macos-arm64"
+        } else {
+            return "natives-macos"
+        }
+    }
+    return null
+}
+
+def lwjglNatives = getLwjglNatives()
+
+if (lwjglNatives != null) {
+    dependencies {
+        runtimeOnly "org.lwjgl:lwjgl::${lwjglNatives}"
+        runtimeOnly "org.lwjgl:lwjgl-glfw::${lwjglNatives}"
+        runtimeOnly "org.lwjgl:lwjgl-opengl::${lwjglNatives}"
+        runtimeOnly "org.lwjgl:lwjgl-openal::${lwjglNatives}"
+        runtimeOnly "org.lwjgl:lwjgl-stb::${lwjglNatives}"
+    }
+}
+
+application {
+    mainClass = 'dev.turtywurty.mysticfactories.Main'
+}
