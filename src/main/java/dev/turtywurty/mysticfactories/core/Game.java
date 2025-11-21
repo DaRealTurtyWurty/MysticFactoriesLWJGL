@@ -1,14 +1,10 @@
 package dev.turtywurty.mysticfactories.core;
 
 import dev.turtywurty.mysticfactories.camera.Camera;
-import dev.turtywurty.mysticfactories.renderer.Mesh;
-import dev.turtywurty.mysticfactories.renderer.Shader;
-import dev.turtywurty.mysticfactories.renderer.Texture;
 import dev.turtywurty.mysticfactories.settings.Settings;
 import dev.turtywurty.mysticfactories.window.Keyboard;
 import dev.turtywurty.mysticfactories.window.Mouse;
 import dev.turtywurty.mysticfactories.window.Window;
-import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
@@ -20,9 +16,6 @@ public class Game implements Runnable {
     private final Thread gameThread;
     private final Settings settings;
 
-    private Shader shader;
-    private Texture texture;
-    private Mesh mesh;
     private Camera camera;
 
     private boolean isSpacePressed = false;
@@ -47,30 +40,8 @@ public class Game implements Runnable {
     private void init() {
         this.window.create();
 
-        this.shader = new Shader("src/main/resources/shaders/vertex.glsl", "src/main/resources/shaders/fragment.glsl");
-
-        this.texture = new Texture("src/main/resources/textures/white.png");
-
         this.camera = new Camera(new Vector2f(0.0f, 0.0f), 200f);
         this.camera.setOrthoBounds(this.window.getWidth(), this.window.getHeight());
-        
-        float[] positions = new float[]{
-            -0.5f,  0.5f,
-             0.5f,  0.5f,
-             0.5f, -0.5f,
-            -0.5f, -0.5f
-        };
-        float[] texCoords = new float[]{
-            0.0f, 1.0f,
-            1.0f, 1.0f,
-            1.0f, 0.0f,
-            0.0f, 0.0f
-        };
-        int[] indices = new int[]{
-            0, 1, 2,
-            2, 3, 0
-        };
-        this.mesh = new Mesh(positions, texCoords, indices, this.texture);
     }
 
     private void loop() {
@@ -153,7 +124,7 @@ public class Game implements Runnable {
         if (Keyboard.isKeyDown(GLFW.GLFW_KEY_D)) {
             camera.processKeyboard(Camera.CameraMovement.RIGHT, 0.01f);
         }
-        
+
         if (Mouse.isScrollMoved()) {
             camera.processScroll((float) Mouse.getScrollY());
             camera.setOrthoBounds(this.window.getWidth(), this.window.getHeight());
@@ -172,26 +143,12 @@ public class Game implements Runnable {
         }
 
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-        
-        this.shader.bind();
 
-        Matrix4f model = new Matrix4f().identity();
-
-        this.shader.setUniformMat4("model", model);
-        this.shader.setUniformMat4("view", camera.getViewMatrix());
-        this.shader.setUniformMat4("projection", camera.getProjectionMatrix());
-        this.shader.setUniformInt("ourTexture", 0);
-
-        mesh.render();
-
-        this.shader.unbind();
+        // Rendering code would go here
     }
 
     private void cleanup() {
         this.window.getSettings().save();
-        this.mesh.cleanup();
-        this.shader.cleanup();
-        this.texture.cleanup();
         this.window.destroy();
     }
 }
