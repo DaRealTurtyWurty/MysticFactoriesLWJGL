@@ -1,6 +1,6 @@
 package dev.turtywurty.mysticfactories.client.world;
 
-import dev.turtywurty.mysticfactories.client.render.world.WorldRendererBase;
+import dev.turtywurty.mysticfactories.client.render.world.WorldRenderer;
 import dev.turtywurty.mysticfactories.world.*;
 import dev.turtywurty.mysticfactories.world.entity.Entity;
 import lombok.Getter;
@@ -12,8 +12,6 @@ import java.util.UUID;
 
 @Setter
 public class ClientWorld extends World {
-    @Getter
-    private WorldRendererBase renderer;
     private UUID localPlayerId;
 
     public ClientWorld(WorldType worldType, long seed) {

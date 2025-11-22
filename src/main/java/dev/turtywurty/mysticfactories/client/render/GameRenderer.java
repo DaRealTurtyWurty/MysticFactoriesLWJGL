@@ -4,12 +4,15 @@ import dev.turtywurty.mysticfactories.client.camera.Camera;
 import dev.turtywurty.mysticfactories.client.render.pipeline.RenderContext;
 import dev.turtywurty.mysticfactories.client.render.pipeline.RenderPipeline;
 import dev.turtywurty.mysticfactories.client.render.pipeline.passes.ClearPass;
+import dev.turtywurty.mysticfactories.client.render.pipeline.passes.UIPass;
 import dev.turtywurty.mysticfactories.client.render.pipeline.passes.WorldPass;
-import dev.turtywurty.mysticfactories.client.render.world.WorldRendererBase;
+import dev.turtywurty.mysticfactories.client.render.world.WorldRenderer;
 import dev.turtywurty.mysticfactories.client.render.world.entity.EntityRenderContext;
 import dev.turtywurty.mysticfactories.client.render.world.tile.TileRenderContext;
 import dev.turtywurty.mysticfactories.client.shader.Shader;
 import dev.turtywurty.mysticfactories.client.shader.ShaderManager;
+import dev.turtywurty.mysticfactories.client.ui.UIRenderer;
+import dev.turtywurty.mysticfactories.client.window.Window;
 import dev.turtywurty.mysticfactories.client.world.ClientWorld;
 import lombok.Getter;
 
@@ -24,23 +27,27 @@ public class GameRenderer {
     @Getter
     private final Camera camera;
 
-    public GameRenderer(Camera camera) {
+    public GameRenderer(Camera camera, Window window) {
         this.camera = camera;
         this.shaderManager = new ShaderManager();
         Shader texturedShader = this.shaderManager.create("textured",
+                "shaders/texture.vert",
+                "shaders/texture.frag");
+        Shader uiShader = this.shaderManager.create("ui",
                 "shaders/texture.vert",
                 "shaders/texture.frag");
 
         this.tileRenderContext = new TileRenderContext(texturedShader, camera);
         this.entityRenderContext = new EntityRenderContext(texturedShader, camera);
 
-        this.renderContext = new RenderContext(camera, this.tileRenderContext, this.entityRenderContext);
+        this.renderContext = new RenderContext(camera, this.tileRenderContext, this.entityRenderContext, uiShader, window);
         this.pipeline = new RenderPipeline()
                 .addPass(new ClearPass(0.1f, 0.1f, 0.1f, 1.0f))
-                .addPass(new WorldPass());
+                .addPass(new WorldPass())
+                .addPass(new UIPass(uiShader, new UIRenderer(uiShader)));
     }
 
-    public void render(ClientWorld world, WorldRendererBase worldRenderer) {
+    public void render(ClientWorld world, WorldRenderer worldRenderer) {
         this.renderContext.setWorld(world);
         this.renderContext.setWorldRenderer(worldRenderer);
         this.pipeline.render(this.renderContext);

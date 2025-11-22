@@ -13,6 +13,8 @@ import dev.turtywurty.mysticfactories.world.tile.TilePos;
 import dev.turtywurty.mysticfactories.world.tile.TileRegistry;
 import dev.turtywurty.mysticfactories.world.tile.TileType;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
@@ -23,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WorldRenderer implements WorldRendererBase {
+public class WorldRenderer {
     private final EntityRendererRegistry entityRendererRegistry;
     private final Matrix4f modelMatrix = new Matrix4f();
     private final Map<ChunkPos, ChunkRenderData> chunkMeshes = new HashMap<>();
@@ -34,7 +36,6 @@ public class WorldRenderer implements WorldRendererBase {
         this.tileAtlas = TileAtlas.build(tileRegistry);
     }
 
-    @Override
     public void render(ClientWorld world, TileRenderContext tileRenderContext, EntityRenderContext entityRenderContext) {
         float tileSize = world.getTileSize();
         cullMissingChunks(world);
@@ -243,6 +244,10 @@ public class WorldRenderer implements WorldRendererBase {
 
     private record TileBatchMesh(int vao, int vbo, int ebo, int indexCount) {
         void render(TileRenderContext context) {
+            context.shader().setUniform("uUseTexture", true);
+            context.shader().setUniform("uColor", new Vector4f(1f, 1f, 1f, 1f));
+            context.shader().setUniform("uUVMin", new Vector2f(0f, 0f));
+            context.shader().setUniform("uUVMax", new Vector2f(1f, 1f));
             context.shader().setUniform("uTexture", 0);
             GL30.glBindVertexArray(this.vao);
             GL11.glDrawElements(GL11.GL_TRIANGLES, this.indexCount, GL11.GL_UNSIGNED_INT, 0);

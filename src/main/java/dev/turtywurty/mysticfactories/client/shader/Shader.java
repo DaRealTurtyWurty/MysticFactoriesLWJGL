@@ -3,6 +3,7 @@ package dev.turtywurty.mysticfactories.client.shader;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.system.MemoryStack;
@@ -95,12 +96,20 @@ public class Shader {
         GL20.glUniform1f(getUniformLocation(name), value);
     }
 
+    public void setUniform(String name, boolean value) {
+        GL20.glUniform1i(getUniformLocation(name), value ? 1 : 0);
+    }
+
     public void setUniform(String name, Vector2f value) {
         GL20.glUniform2f(getUniformLocation(name), value.x, value.y);
     }
 
     public void setUniform(String name, Vector3f value) {
         GL20.glUniform3f(getUniformLocation(name), value.x, value.y, value.z);
+    }
+
+    public void setUniform(String name, Vector4f value) {
+        GL20.glUniform4f(getUniformLocation(name), value.x, value.y, value.z, value.w);
     }
 
     public void setUniform(String name, Matrix4f value) {

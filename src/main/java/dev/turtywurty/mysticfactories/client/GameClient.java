@@ -5,17 +5,15 @@ import dev.turtywurty.mysticfactories.client.input.InputManager;
 import dev.turtywurty.mysticfactories.client.input.PlayerInputController;
 import dev.turtywurty.mysticfactories.client.render.GameRenderer;
 import dev.turtywurty.mysticfactories.client.render.world.WorldRenderer;
-import dev.turtywurty.mysticfactories.client.render.world.WorldRendererBase;
-import dev.turtywurty.mysticfactories.client.render.world.WorldRendererRegistry;
-import dev.turtywurty.mysticfactories.client.render.world.entity.EntityRendererRegistry;
 import dev.turtywurty.mysticfactories.client.render.world.entity.BasicEntityRenderer;
+import dev.turtywurty.mysticfactories.client.render.world.entity.EntityRendererRegistry;
 import dev.turtywurty.mysticfactories.client.settings.Settings;
 import dev.turtywurty.mysticfactories.client.window.Window;
 import dev.turtywurty.mysticfactories.client.world.ClientWorld;
 import dev.turtywurty.mysticfactories.client.world.LocalWorldConnection;
+import dev.turtywurty.mysticfactories.init.EntityTypes;
 import dev.turtywurty.mysticfactories.init.TileTypes;
 import dev.turtywurty.mysticfactories.init.WorldTypes;
-import dev.turtywurty.mysticfactories.init.EntityTypes;
 import dev.turtywurty.mysticfactories.server.IntegratedServer;
 import dev.turtywurty.mysticfactories.server.ServerWorld;
 import dev.turtywurty.mysticfactories.world.ChunkPos;
@@ -37,7 +35,6 @@ public class GameClient implements Runnable {
     private Camera camera;
     private InputManager inputManager;
     private GameRenderer gameRenderer;
-    private WorldRendererRegistry worldRendererRegistry;
     private TileRegistry tileRegistry;
     private @Nullable IntegratedServer integratedServer; // null when connected to remote
     private ClientWorld clientWorld;
@@ -150,16 +147,18 @@ public class GameClient implements Runnable {
     }
 
     private void render(double alpha) {
-        renderWorld();
+        if (this.gameRenderer != null) {
+            WorldRenderer renderer = this.clientWorld != null ?
+                    this.worldRenderer :
+                    null;
+
+            this.gameRenderer.render(this.clientWorld, renderer);
+        }
     }
 
     private void cleanup() {
         if (this.worldRenderer != null) {
             this.worldRenderer.cleanup();
-        }
-
-        if (this.worldRendererRegistry != null) {
-            this.worldRendererRegistry.cleanup();
         }
 
         if (this.gameRenderer != null) {
@@ -174,15 +173,6 @@ public class GameClient implements Runnable {
         this.window.destroy();
     }
 
-    private void renderWorld() {
-        if (this.gameRenderer != null) {
-            WorldRendererBase renderer = this.clientWorld != null ?
-                    this.worldRendererRegistry.getRendererFor(this.clientWorld.getWorldType()) :
-                    null;
-            this.gameRenderer.render(this.clientWorld, renderer);
-        }
-    }
-
     private void setupWorldsAndRenderers() {
         this.tileRegistry = new TileRegistry();
         TileTypes.register(this.tileRegistry);
@@ -191,7 +181,6 @@ public class GameClient implements Runnable {
         var entityRendererRegistry = new EntityRendererRegistry();
         entityRendererRegistry.registerRenderer(EntityTypes.PLAYER, new BasicEntityRenderer<>(EntityTypes.PLAYER.id(), 16.0f));
         this.worldRenderer = new WorldRenderer(entityRendererRegistry, this.tileRegistry);
-        this.worldRendererRegistry = new WorldRendererRegistry(this.worldRenderer);
         var worldTypeRegistry = new WorldTypeRegistry();
         WorldTypes.register(worldTypeRegistry);
 
@@ -208,7 +197,6 @@ public class GameClient implements Runnable {
         this.integratedServer.addWorld(overworld);
 
         this.clientWorld = new ClientWorld(overworldType, overworld.getWorldData().getSeed());
-        this.clientWorld.setRenderer(this.worldRendererRegistry.getRendererFor(overworldType));
 
         // Local world connection forwards updates to the client
         var connection = new LocalWorldConnection(this.clientWorld);
@@ -223,6 +211,6 @@ public class GameClient implements Runnable {
         this.clientWorld.getLocalPlayer().ifPresent(this.camera::setFollowTarget);
         this.inputManager.addListener(new PlayerInputController(this.clientWorld));
 
-        this.gameRenderer = new GameRenderer(this.camera);
+        this.gameRenderer = new GameRenderer(this.camera, this.window);
     }
 }

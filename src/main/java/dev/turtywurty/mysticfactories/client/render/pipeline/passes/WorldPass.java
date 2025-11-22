@@ -2,7 +2,7 @@ package dev.turtywurty.mysticfactories.client.render.pipeline.passes;
 
 import dev.turtywurty.mysticfactories.client.render.pipeline.RenderContext;
 import dev.turtywurty.mysticfactories.client.render.pipeline.RenderPass;
-import dev.turtywurty.mysticfactories.client.render.world.WorldRendererBase;
+import dev.turtywurty.mysticfactories.client.render.world.WorldRenderer;
 import dev.turtywurty.mysticfactories.client.render.world.entity.EntityRenderContext;
 import dev.turtywurty.mysticfactories.client.render.world.tile.TileRenderContext;
 import dev.turtywurty.mysticfactories.client.world.ClientWorld;
@@ -11,7 +11,7 @@ public class WorldPass implements RenderPass {
     @Override
     public void render(RenderContext context) {
         ClientWorld world = context.getWorld();
-        WorldRendererBase worldRenderer = context.getWorldRenderer();
+        WorldRenderer worldRenderer = context.getWorldRenderer();
         if (world == null || worldRenderer == null)
             return;
 
