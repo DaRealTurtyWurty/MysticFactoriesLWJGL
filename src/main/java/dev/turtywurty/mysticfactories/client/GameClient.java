@@ -7,8 +7,6 @@ import dev.turtywurty.mysticfactories.client.render.world.WorldRenderer;
 import dev.turtywurty.mysticfactories.client.render.world.WorldRendererBase;
 import dev.turtywurty.mysticfactories.client.render.world.WorldRendererRegistry;
 import dev.turtywurty.mysticfactories.client.render.world.entity.EntityRendererRegistry;
-import dev.turtywurty.mysticfactories.client.render.world.tile.DefaultTileRenderer;
-import dev.turtywurty.mysticfactories.client.render.world.tile.TileRendererRegistry;
 import dev.turtywurty.mysticfactories.client.settings.Settings;
 import dev.turtywurty.mysticfactories.client.window.Window;
 import dev.turtywurty.mysticfactories.client.world.ClientWorld;
@@ -17,9 +15,9 @@ import dev.turtywurty.mysticfactories.init.TileTypes;
 import dev.turtywurty.mysticfactories.init.WorldTypes;
 import dev.turtywurty.mysticfactories.server.IntegratedServer;
 import dev.turtywurty.mysticfactories.server.ServerWorld;
-import dev.turtywurty.mysticfactories.world.tile.TileRegistry;
 import dev.turtywurty.mysticfactories.world.ChunkPos;
 import dev.turtywurty.mysticfactories.world.WorldTypeRegistry;
+import dev.turtywurty.mysticfactories.world.tile.TileRegistry;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
@@ -35,7 +33,6 @@ public class GameClient implements Runnable {
     private Camera camera;
     private InputManager inputManager;
     private GameRenderer gameRenderer;
-    private TileRendererRegistry tileRendererRegistry;
     private EntityRendererRegistry entityRendererRegistry;
     private WorldRendererRegistry worldRendererRegistry;
     private TileRegistry tileRegistry;
@@ -167,10 +164,6 @@ public class GameClient implements Runnable {
             this.gameRenderer.cleanup();
         }
 
-        if (this.tileRendererRegistry != null) {
-            this.tileRendererRegistry.cleanup();
-        }
-
         if (this.tileRegistry != null) {
             this.tileRegistry.cleanup();
         }
@@ -189,13 +182,11 @@ public class GameClient implements Runnable {
     }
 
     private void setupWorldsAndRenderers() {
-        var defaultTileRenderer = new DefaultTileRenderer();
-        this.tileRendererRegistry = new TileRendererRegistry(defaultTileRenderer);
-        this.entityRendererRegistry = new EntityRendererRegistry();
-        this.worldRenderer = new WorldRenderer(this.tileRendererRegistry, this.entityRendererRegistry);
-        this.worldRendererRegistry = new WorldRendererRegistry(this.worldRenderer);
         this.tileRegistry = new TileRegistry();
         TileTypes.register(this.tileRegistry);
+        this.entityRendererRegistry = new EntityRendererRegistry();
+        this.worldRenderer = new WorldRenderer(this.entityRendererRegistry, this.tileRegistry);
+        this.worldRendererRegistry = new WorldRendererRegistry(this.worldRenderer);
         this.worldTypeRegistry = new WorldTypeRegistry();
         WorldTypes.register(this.worldTypeRegistry);
 

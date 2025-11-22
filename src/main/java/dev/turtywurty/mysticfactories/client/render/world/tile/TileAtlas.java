@@ -1,0 +1,142 @@
+package dev.turtywurty.mysticfactories.client.render.world.tile;
+
+import dev.turtywurty.mysticfactories.util.Identifier;
+import dev.turtywurty.mysticfactories.world.tile.TileRegistry;
+import dev.turtywurty.mysticfactories.world.tile.TileType;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.*;
+import org.lwjgl.stb.STBImage;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * Packs tile textures into a single atlas texture and provides UV ranges for each tile.
+ */
+public record TileAtlas(int textureId, int width, int height, Map<Identifier, UV> uvMap) {
+    public static TileAtlas build(TileRegistry tileRegistry) {
+        Map<Identifier, ImageData> images = loadImages(tileRegistry);
+        if (images.isEmpty())
+            throw new IllegalStateException("No tile textures available to build atlas");
+
+        int atlasWidth = images.values().stream().mapToInt(img -> img.width).max().orElse(1);
+        int atlasHeight = images.values().stream().mapToInt(img -> img.height).sum();
+
+        ByteBuffer atlasBuffer = BufferUtils.createByteBuffer(atlasWidth * atlasHeight * 4);
+        Map<Identifier, UV> uvMap = new LinkedHashMap<>();
+
+        int currentY = 0;
+        for (Map.Entry<Identifier, ImageData> entry : images.entrySet()) {
+            Identifier id = entry.getKey();
+            ImageData image = entry.getValue();
+
+            copyIntoAtlas(image, atlasBuffer, atlasWidth, currentY);
+            float u0 = 0f;
+            float v0 = (float) currentY / atlasHeight;
+            float u1 = (float) image.width / atlasWidth;
+            float v1 = (float) (currentY + image.height) / atlasHeight;
+            uvMap.put(id, new UV(u0, v0, u1, v1));
+
+            currentY += image.height;
+            STBImage.stbi_image_free(image.pixels);
+        }
+
+        atlasBuffer.flip();
+        int textureId = uploadAtlasTexture(atlasBuffer, atlasWidth, atlasHeight);
+        return new TileAtlas(textureId, atlasWidth, atlasHeight, uvMap);
+    }
+
+    public UV getUv(TileType tileType) {
+        return this.uvMap.get(tileType.getId());
+    }
+
+    public void bind(int slot) {
+        GL13.glActiveTexture(GL13.GL_TEXTURE0 + slot);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.textureId);
+    }
+
+    public void unbind() {
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+    }
+
+    public void cleanup() {
+        GL11.glDeleteTextures(this.textureId);
+    }
+
+    private static Map<Identifier, ImageData> loadImages(TileRegistry tileRegistry) {
+        Map<Identifier, ImageData> images = new LinkedHashMap<>();
+        tileRegistry.getAll().forEach((id, tile) -> {
+            String path = "textures/" + id.path() + ".png";
+            try {
+                images.put(id, loadImage(path));
+            } catch (IOException exception) {
+                throw new IllegalStateException("Failed to load tile texture: " + path, exception);
+            }
+        });
+        
+        return images;
+    }
+
+    private static ImageData loadImage(String resourcePath) throws IOException {
+        byte[] bytes;
+        try (InputStream stream = TileAtlas.class.getClassLoader().getResourceAsStream(resourcePath)) {
+            if (stream == null)
+                throw new IOException("Resource not found: " + resourcePath);
+
+            bytes = stream.readAllBytes();
+        }
+
+        ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length);
+        buffer.put(bytes).flip();
+
+        IntBuffer w = BufferUtils.createIntBuffer(1);
+        IntBuffer h = BufferUtils.createIntBuffer(1);
+        IntBuffer channels = BufferUtils.createIntBuffer(1);
+        STBImage.stbi_set_flip_vertically_on_load(true);
+        ByteBuffer pixels = STBImage.stbi_load_from_memory(buffer, w, h, channels, 4);
+        if (pixels == null)
+            throw new IOException("Failed to decode image " + resourcePath + ": " + STBImage.stbi_failure_reason());
+
+        return new ImageData(w.get(0), h.get(0), pixels);
+    }
+
+    private static void copyIntoAtlas(ImageData image, ByteBuffer atlas, int atlasWidth, int destY) {
+        int rowSize = image.width * 4;
+        for (int y = 0; y < image.height; y++) {
+            int destOffset = ((destY + y) * atlasWidth * 4);
+            int srcOffset = y * rowSize;
+            for (int x = 0; x < rowSize; x++) {
+                atlas.put(destOffset + x, image.pixels.get(srcOffset + x));
+            }
+        }
+    }
+
+    private static int uploadAtlasTexture(ByteBuffer data, int width, int height) {
+        int textureId = GL11.glGenTextures();
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
+
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST_MIPMAP_NEAREST);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, data);
+        GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
+
+        float maxAniso = GL11.glGetFloat(GL46.GL_MAX_TEXTURE_MAX_ANISOTROPY);
+        GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL46.GL_TEXTURE_MAX_ANISOTROPY, Math.max(1.0f, maxAniso));
+
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+        return textureId;
+    }
+
+    public record UV(float u0, float v0, float u1, float v1) {
+    }
+
+    private record ImageData(int width, int height, ByteBuffer pixels) {
+    }
+}

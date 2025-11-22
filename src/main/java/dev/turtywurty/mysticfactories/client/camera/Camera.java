@@ -1,18 +1,29 @@
 package dev.turtywurty.mysticfactories.client.camera;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
 public class Camera {
+    @Getter
     private final Vector2f position;
     private final Matrix4f viewMatrix = new Matrix4f();
     private final Matrix4f projectionMatrix = new Matrix4f();
 
-    // Orthographic projection bounds
-    private float orthoLeft, orthoRight, orthoBottom, orthoTop;
+    @Getter
+    private float orthoLeft;
+    @Getter
+    private float orthoRight;
+    @Getter
+    private float orthoBottom;
+    @Getter
+    private float orthoTop;
     private final float orthoNear, orthoFar;
 
+    @Setter
     private float targetWorldHeight;
+    @Getter
     private float zoom;
     private float unitsPerPixel = 1.0f;
 
@@ -39,7 +50,7 @@ public class Camera {
         return this.projectionMatrix.identity()
                 .ortho(orthoLeft, orthoRight, orthoBottom, orthoTop, orthoNear, orthoFar);
     }
-    
+
     public void setOrthoBounds(float windowWidth, float windowHeight) {
         float effectiveWorldHeight = targetWorldHeight / zoom;
         float aspectRatio = windowWidth / windowHeight;
@@ -53,7 +64,7 @@ public class Camera {
     }
 
     public void processKeyboard(CameraMovement direction, float deltaTime) {
-        float velocity = 2.5f * deltaTime;
+        float velocity = 100f * deltaTime;
         if (direction == CameraMovement.UP) {
             position.y += velocity;
         }
@@ -70,10 +81,10 @@ public class Camera {
             position.x += velocity;
         }
     }
-    
-    public void processScroll(float yoffset) {
+
+    public void processScroll(float yOffset) {
         float zoomSensitivity = 0.1f;
-        zoom += yoffset * zoomSensitivity;
+        zoom += yOffset * zoomSensitivity;
         if (zoom < 0.1f) {
             zoom = 0.1f;
         }
@@ -81,18 +92,6 @@ public class Camera {
         if (zoom > 10.0f) {
             zoom = 10.0f;
         }
-    }
-
-    public Vector2f getPosition() {
-        return position;
-    }
-
-    public float getZoom() {
-        return zoom;
-    }
-
-    public void setTargetWorldHeight(float targetWorldHeight) {
-        this.targetWorldHeight = targetWorldHeight;
     }
 
     public enum CameraMovement {

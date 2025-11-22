@@ -1,7 +1,6 @@
 package dev.turtywurty.mysticfactories.client.render;
 
 import dev.turtywurty.mysticfactories.client.camera.Camera;
-import dev.turtywurty.mysticfactories.client.render.mesh.QuadMesh;
 import dev.turtywurty.mysticfactories.client.render.pipeline.RenderContext;
 import dev.turtywurty.mysticfactories.client.render.pipeline.RenderPipeline;
 import dev.turtywurty.mysticfactories.client.render.pipeline.passes.ClearPass;
@@ -16,8 +15,6 @@ import lombok.Getter;
 
 public class GameRenderer {
     private final ShaderManager shaderManager;
-    private final Shader texturedShader;
-    private final QuadMesh quadMesh;
     @Getter
     private final TileRenderContext tileRenderContext;
     @Getter
@@ -30,11 +27,12 @@ public class GameRenderer {
     public GameRenderer(Camera camera) {
         this.camera = camera;
         this.shaderManager = new ShaderManager();
-        this.texturedShader = this.shaderManager.create("textured", "shaders/texture.vert", "shaders/texture.frag");
-        this.quadMesh = new QuadMesh();
+        Shader texturedShader = this.shaderManager.create("textured",
+                "shaders/texture.vert",
+                "shaders/texture.frag");
 
-        this.tileRenderContext = new TileRenderContext(this.texturedShader, camera, this.quadMesh.getVao(), this.quadMesh.getIndexCount());
-        this.entityRenderContext = new EntityRenderContext(this.texturedShader, camera, this.quadMesh.getVao(), this.quadMesh.getIndexCount());
+        this.tileRenderContext = new TileRenderContext(texturedShader, camera);
+        this.entityRenderContext = new EntityRenderContext(texturedShader, camera);
 
         this.renderContext = new RenderContext(camera, this.tileRenderContext, this.entityRenderContext);
         this.pipeline = new RenderPipeline()
@@ -50,7 +48,6 @@ public class GameRenderer {
 
     public void cleanup() {
         this.shaderManager.cleanup();
-        this.quadMesh.cleanup();
         this.pipeline.cleanup();
     }
 }
