@@ -2,6 +2,7 @@ package dev.turtywurty.mysticfactories.client;
 
 import dev.turtywurty.mysticfactories.client.camera.Camera;
 import dev.turtywurty.mysticfactories.client.input.InputManager;
+import dev.turtywurty.mysticfactories.client.input.PlayerInputController;
 import dev.turtywurty.mysticfactories.client.render.GameRenderer;
 import dev.turtywurty.mysticfactories.client.render.world.WorldRenderer;
 import dev.turtywurty.mysticfactories.client.render.world.WorldRendererBase;
@@ -220,6 +221,7 @@ public class GameClient implements Runnable {
         connection.sendEntitySpawn(overworldType, player);
         connection.sendPlayerBind(overworldType, player.getUuid());
         this.clientWorld.getLocalPlayer().ifPresent(this.camera::setFollowTarget);
+        this.inputManager.addListener(new PlayerInputController(this.clientWorld));
 
         this.gameRenderer = new GameRenderer(this.camera);
     }

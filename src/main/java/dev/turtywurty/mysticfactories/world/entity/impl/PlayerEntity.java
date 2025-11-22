@@ -30,7 +30,7 @@ public class PlayerEntity extends LivingEntity {
     public AttributeMap.Builder createAttributes() {
         return AttributeMap.builder()
                 .put(AttributeKeys.MAX_HEALTH, 20f)
-                .put(AttributeKeys.MOVEMENT_SPEED, 0.1)
+                .put(AttributeKeys.MOVEMENT_SPEED, 5D)
                 .put(AttributeKeys.ATTACK_DAMAGE, 1f);
     }
 }

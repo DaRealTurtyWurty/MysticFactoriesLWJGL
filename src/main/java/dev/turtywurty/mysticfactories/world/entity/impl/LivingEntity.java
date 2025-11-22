@@ -2,6 +2,7 @@ package dev.turtywurty.mysticfactories.world.entity.impl;
 
 import dev.turtywurty.mysticfactories.world.World;
 import dev.turtywurty.mysticfactories.world.entity.*;
+import dev.turtywurty.mysticfactories.world.entity.attribs.AttributeKey;
 import dev.turtywurty.mysticfactories.world.entity.attribs.AttributeKeys;
 import dev.turtywurty.mysticfactories.world.entity.attribs.AttributeMap;
 import dev.turtywurty.mysticfactories.world.entity.data.EntityDataReader;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class LivingEntity extends Entity {
+    @Getter
     protected final AttributeMap attributes;
     protected boolean noAI = false;
     @Getter
@@ -44,9 +46,7 @@ public abstract class LivingEntity extends Entity {
     }
 
     @Override
-    public void onRemovedFromWorld(World world, RemovalReason reason) {
-
-    }
+    public void onRemovedFromWorld(World world, RemovalReason reason) {}
 
     public void onDeath() {
         remove(RemovalReason.KILLED);
@@ -68,6 +68,14 @@ public abstract class LivingEntity extends Entity {
 
     public float getMaxHealth() {
         return this.attributes.getFloat(AttributeKeys.MAX_HEALTH);
+    }
+
+    public double getMovementSpeed() {
+        return this.attributes.getDouble(AttributeKeys.MOVEMENT_SPEED);
+    }
+
+    public <T> T getAttributeValue(AttributeKey<T> key) {
+        return this.attributes.get(key).getBaseValue();
     }
 
     public void onHurt(float amount, boolean died) {}
