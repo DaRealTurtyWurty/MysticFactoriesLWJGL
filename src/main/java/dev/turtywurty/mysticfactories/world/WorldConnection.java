@@ -2,7 +2,9 @@ package dev.turtywurty.mysticfactories.world;
 
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
 import dev.turtywurty.mysticfactories.world.tile.TileType;
+import dev.turtywurty.mysticfactories.world.entity.Entity;
 
+import java.util.UUID;
 import java.util.Map;
 
 public interface WorldConnection {
@@ -15,4 +17,19 @@ public interface WorldConnection {
      * Sends the initial full state (or a resync) to the client world.
      */
     void sendFullState(WorldType worldType, Map<ChunkPos, Chunk> chunks);
+
+    /**
+     * Sends an entity spawn to the client.
+     */
+    void sendEntitySpawn(WorldType worldType, Entity entity);
+
+    /**
+     * Notifies the client that an entity should be removed.
+     */
+    void sendEntityRemove(WorldType worldType, UUID entityId);
+
+    /**
+     * Identifies which entity represents the local player.
+     */
+    void sendPlayerBind(WorldType worldType, UUID playerId);
 }

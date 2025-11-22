@@ -17,23 +17,6 @@ public class InputManager {
         if (Keyboard.isKeyDown(GLFW.GLFW_KEY_ESCAPE)) {
             GLFW.glfwSetWindowShouldClose(this.window.getId(), true);
         }
-        float dt = (float) deltaTime;
-
-        if (Keyboard.isKeyDown(GLFW.GLFW_KEY_W)) {
-            camera.processKeyboard(Camera.CameraMovement.UP, dt);
-        }
-
-        if (Keyboard.isKeyDown(GLFW.GLFW_KEY_S)) {
-            camera.processKeyboard(Camera.CameraMovement.DOWN, dt);
-        }
-
-        if (Keyboard.isKeyDown(GLFW.GLFW_KEY_A)) {
-            camera.processKeyboard(Camera.CameraMovement.LEFT, dt);
-        }
-
-        if (Keyboard.isKeyDown(GLFW.GLFW_KEY_D)) {
-            camera.processKeyboard(Camera.CameraMovement.RIGHT, dt);
-        }
 
         if (Mouse.isScrollMoved()) {
             camera.processScroll((float) Mouse.getScrollY());

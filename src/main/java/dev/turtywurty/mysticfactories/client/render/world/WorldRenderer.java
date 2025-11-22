@@ -66,6 +66,9 @@ public class WorldRenderer implements WorldRendererBase {
     @SuppressWarnings("unchecked")
     private <T extends Entity> void renderEntity(EntityRenderContext context, T entity) {
         EntityRenderer<T> renderer = (EntityRenderer<T>) this.entityRendererRegistry.getRendererFor(entity.getType());
+        if (renderer == null)
+            return;
+
         renderer.render(context, entity, this.modelMatrix);
     }
 

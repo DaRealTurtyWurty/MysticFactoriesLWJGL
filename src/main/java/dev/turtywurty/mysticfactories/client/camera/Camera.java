@@ -1,5 +1,6 @@
 package dev.turtywurty.mysticfactories.client.camera;
 
+import dev.turtywurty.mysticfactories.world.entity.Entity;
 import lombok.Getter;
 import lombok.Setter;
 import org.joml.Matrix4f;
@@ -10,6 +11,8 @@ public class Camera {
     private final Vector2f position;
     private final Matrix4f viewMatrix = new Matrix4f();
     private final Matrix4f projectionMatrix = new Matrix4f();
+    @Setter
+    private Entity followTarget;
 
     @Getter
     private float orthoLeft;
@@ -37,10 +40,12 @@ public class Camera {
     }
 
     public Matrix4f getViewMatrix() {
+        updateFollowTarget();
         return this.viewMatrix.identity().translate(-position.x, -position.y, 0.0f);
     }
 
     public Matrix4f getViewMatrixPixelAligned() {
+        updateFollowTarget();
         float snappedX = (float) Math.round(position.x / unitsPerPixel) * unitsPerPixel;
         float snappedY = (float) Math.round(position.y / unitsPerPixel) * unitsPerPixel;
         return this.viewMatrix.identity().translate(-snappedX, -snappedY, 0.0f);
@@ -63,25 +68,6 @@ public class Camera {
         this.unitsPerPixel = (this.orthoTop - this.orthoBottom) / windowHeight;
     }
 
-    public void processKeyboard(CameraMovement direction, float deltaTime) {
-        float velocity = 100f * deltaTime;
-        if (direction == CameraMovement.UP) {
-            position.y += velocity;
-        }
-
-        if (direction == CameraMovement.DOWN) {
-            position.y -= velocity;
-        }
-
-        if (direction == CameraMovement.LEFT) {
-            position.x -= velocity;
-        }
-
-        if (direction == CameraMovement.RIGHT) {
-            position.x += velocity;
-        }
-    }
-
     public void processScroll(float yOffset) {
         float zoomSensitivity = 0.1f;
         zoom += yOffset * zoomSensitivity;
@@ -99,5 +85,16 @@ public class Camera {
         DOWN,
         LEFT,
         RIGHT
+    }
+
+    public void clearFollowTarget() {
+        this.followTarget = null;
+    }
+
+    private void updateFollowTarget() {
+        if (this.followTarget != null) {
+            var pos = this.followTarget.getPosition();
+            this.position.set((float) pos.x, (float) pos.y);
+        }
     }
 }

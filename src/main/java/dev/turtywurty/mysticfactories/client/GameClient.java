@@ -7,16 +7,19 @@ import dev.turtywurty.mysticfactories.client.render.world.WorldRenderer;
 import dev.turtywurty.mysticfactories.client.render.world.WorldRendererBase;
 import dev.turtywurty.mysticfactories.client.render.world.WorldRendererRegistry;
 import dev.turtywurty.mysticfactories.client.render.world.entity.EntityRendererRegistry;
+import dev.turtywurty.mysticfactories.client.render.world.entity.BasicEntityRenderer;
 import dev.turtywurty.mysticfactories.client.settings.Settings;
 import dev.turtywurty.mysticfactories.client.window.Window;
 import dev.turtywurty.mysticfactories.client.world.ClientWorld;
 import dev.turtywurty.mysticfactories.client.world.LocalWorldConnection;
 import dev.turtywurty.mysticfactories.init.TileTypes;
 import dev.turtywurty.mysticfactories.init.WorldTypes;
+import dev.turtywurty.mysticfactories.init.EntityTypes;
 import dev.turtywurty.mysticfactories.server.IntegratedServer;
 import dev.turtywurty.mysticfactories.server.ServerWorld;
 import dev.turtywurty.mysticfactories.world.ChunkPos;
 import dev.turtywurty.mysticfactories.world.WorldTypeRegistry;
+import dev.turtywurty.mysticfactories.world.entity.EntityTypeRegistry;
 import dev.turtywurty.mysticfactories.world.tile.TileRegistry;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
@@ -33,10 +36,8 @@ public class GameClient implements Runnable {
     private Camera camera;
     private InputManager inputManager;
     private GameRenderer gameRenderer;
-    private EntityRendererRegistry entityRendererRegistry;
     private WorldRendererRegistry worldRendererRegistry;
     private TileRegistry tileRegistry;
-    private WorldTypeRegistry worldTypeRegistry;
     private @Nullable IntegratedServer integratedServer; // null when connected to remote
     private ClientWorld clientWorld;
     private WorldRenderer worldRenderer;
@@ -184,11 +185,14 @@ public class GameClient implements Runnable {
     private void setupWorldsAndRenderers() {
         this.tileRegistry = new TileRegistry();
         TileTypes.register(this.tileRegistry);
-        this.entityRendererRegistry = new EntityRendererRegistry();
-        this.worldRenderer = new WorldRenderer(this.entityRendererRegistry, this.tileRegistry);
+        var entityTypeRegistry = new EntityTypeRegistry();
+        EntityTypes.register(entityTypeRegistry);
+        var entityRendererRegistry = new EntityRendererRegistry();
+        entityRendererRegistry.registerRenderer(EntityTypes.PLAYER, new BasicEntityRenderer<>(EntityTypes.PLAYER.id(), 16.0f));
+        this.worldRenderer = new WorldRenderer(entityRendererRegistry, this.tileRegistry);
         this.worldRendererRegistry = new WorldRendererRegistry(this.worldRenderer);
-        this.worldTypeRegistry = new WorldTypeRegistry();
-        WorldTypes.register(this.worldTypeRegistry);
+        var worldTypeRegistry = new WorldTypeRegistry();
+        WorldTypes.register(worldTypeRegistry);
 
         // Integrated server for singleplayer
         this.integratedServer = new IntegratedServer();
@@ -209,6 +213,13 @@ public class GameClient implements Runnable {
         var connection = new LocalWorldConnection(this.clientWorld);
         overworld.setConnection(connection);
         connection.sendFullState(overworldType, overworld.getChunks());
+
+        // Spawn a local player and bind it
+        var player = EntityTypes.PLAYER.create(overworld);
+        overworld.addEntity(player);
+        connection.sendEntitySpawn(overworldType, player);
+        connection.sendPlayerBind(overworldType, player.getUuid());
+        this.clientWorld.getLocalPlayer().ifPresent(this.camera::setFollowTarget);
 
         this.gameRenderer = new GameRenderer(this.camera);
     }

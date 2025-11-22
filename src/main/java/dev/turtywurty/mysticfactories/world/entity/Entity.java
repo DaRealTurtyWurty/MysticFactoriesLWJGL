@@ -17,7 +17,7 @@ public abstract class Entity {
     private final EntityType<?> type;
     private final Vector2d position = new Vector2d(0, 0);
     private final Vector2d velocity = new Vector2d(0, 0);
-    private final UUID uuid = UUID.randomUUID();
+    private UUID uuid = UUID.randomUUID();
     private World world;
     private float rotation = 0f;
     private boolean onGround = true;
@@ -46,6 +46,14 @@ public abstract class Entity {
 
     public void setRotation(float rotation) {
         this.rotation = rotation % 360f;
+    }
+
+    public void setOnGround(boolean onGround) {
+        this.onGround = onGround;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public void addVelocity(double x, double y) {

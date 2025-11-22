@@ -77,7 +77,7 @@ public record TileAtlas(int textureId, int width, int height, Map<Identifier, UV
                 throw new IllegalStateException("Failed to load tile texture: " + path, exception);
             }
         });
-        
+
         return images;
     }
 
