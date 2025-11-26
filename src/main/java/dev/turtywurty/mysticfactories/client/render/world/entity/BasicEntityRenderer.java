@@ -31,6 +31,7 @@ public class BasicEntityRenderer<T extends Entity> implements EntityRenderer<T> 
                 .scale(this.tileSize, this.tileSize, 1.0f);
 
         context.shader().setUniform("uUseTexture", true);
+        context.shader().setUniform("uSampleAlphaOnly", false);
         context.shader().setUniform("uColor", new Vector4f(1f, 1f, 1f, 1f));
         context.shader().setUniform("uUVMin", new Vector2f(0f, 0f));
         context.shader().setUniform("uUVMax", new Vector2f(1f, 1f));

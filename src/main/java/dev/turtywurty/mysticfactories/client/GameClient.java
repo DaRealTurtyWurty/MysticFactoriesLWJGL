@@ -8,6 +8,9 @@ import dev.turtywurty.mysticfactories.client.render.world.WorldRenderer;
 import dev.turtywurty.mysticfactories.client.render.world.entity.BasicEntityRenderer;
 import dev.turtywurty.mysticfactories.client.render.world.entity.EntityRendererRegistry;
 import dev.turtywurty.mysticfactories.client.settings.Settings;
+import dev.turtywurty.mysticfactories.client.text.Fonts;
+import dev.turtywurty.mysticfactories.client.ui.HUDManager;
+import dev.turtywurty.mysticfactories.client.ui.TextLabel;
 import dev.turtywurty.mysticfactories.client.window.Window;
 import dev.turtywurty.mysticfactories.client.world.ClientWorld;
 import dev.turtywurty.mysticfactories.client.world.LocalWorldConnection;
@@ -16,12 +19,14 @@ import dev.turtywurty.mysticfactories.init.TileTypes;
 import dev.turtywurty.mysticfactories.init.WorldTypes;
 import dev.turtywurty.mysticfactories.server.IntegratedServer;
 import dev.turtywurty.mysticfactories.server.ServerWorld;
+import dev.turtywurty.mysticfactories.util.Identifier;
 import dev.turtywurty.mysticfactories.world.ChunkPos;
 import dev.turtywurty.mysticfactories.world.WorldTypeRegistry;
 import dev.turtywurty.mysticfactories.world.entity.EntityTypeRegistry;
 import dev.turtywurty.mysticfactories.world.tile.TileRegistry;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
+import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
@@ -65,6 +70,7 @@ public class GameClient implements Runnable {
         this.camera = new Camera(new Vector2f(0.0f, 0.0f), 200f);
         this.camera.setOrthoBounds(this.window.getWidth(), this.window.getHeight());
         this.inputManager = new InputManager(this.camera, this.window);
+        Fonts.init();
 
         setupWorldsAndRenderers();
     }
@@ -169,6 +175,7 @@ public class GameClient implements Runnable {
             this.tileRegistry.cleanup();
         }
 
+        Fonts.cleanup();
         this.window.getSettings().save();
         this.window.destroy();
     }
@@ -212,5 +219,18 @@ public class GameClient implements Runnable {
         this.inputManager.addListener(new PlayerInputController(this.clientWorld));
 
         this.gameRenderer = new GameRenderer(this.camera, this.window);
+
+        HUDManager.addLastElement(Identifier.of("debug_position"),
+                new TextLabel(Fonts.defaultFont(),
+                        () -> String.format("X: %.2f, Y: %.2f",
+                                this.clientWorld.getLocalPlayer()
+                                        .map(p -> p.getPosition().x)
+                                        .orElse(0.0),
+                                this.clientWorld.getLocalPlayer()
+                                        .map(p -> p.getPosition().y)
+                                        .orElse(0.0)),
+                        8f,
+                        8f,
+                        new Vector4f(1f, 1f, 1f, 1f)));
     }
 }

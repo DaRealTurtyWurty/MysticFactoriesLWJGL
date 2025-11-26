@@ -4,6 +4,7 @@ import dev.turtywurty.mysticfactories.client.input.Mouse;
 import dev.turtywurty.mysticfactories.client.render.pipeline.RenderContext;
 import dev.turtywurty.mysticfactories.client.render.pipeline.RenderPass;
 import dev.turtywurty.mysticfactories.client.shader.Shader;
+import dev.turtywurty.mysticfactories.client.text.TextRenderer;
 import dev.turtywurty.mysticfactories.client.ui.DrawContext;
 import dev.turtywurty.mysticfactories.client.ui.HUDManager;
 import dev.turtywurty.mysticfactories.client.ui.UIRenderer;
@@ -13,7 +14,7 @@ import org.lwjgl.opengl.GL11;
 /**
  * UI pass that draws HUD/screens in screen space using a UI renderer.
  */
-public record UIPass(Shader uiShader, UIRenderer uiRenderer) implements RenderPass {
+public record UIPass(Shader uiShader, UIRenderer uiRenderer, TextRenderer textRenderer) implements RenderPass {
     @Override
     public void render(RenderContext context) {
         if (this.uiShader == null)
@@ -33,10 +34,11 @@ public record UIPass(Shader uiShader, UIRenderer uiRenderer) implements RenderPa
         var proj = new Matrix4f().ortho(0, w, h, 0, -1, 1);
         uiShader.setUniform("uView", view);
         uiShader.setUniform("uProjection", proj);
+        uiShader.setUniform("uSampleAlphaOnly", false);
 
         double mouseX = Mouse.getX();
         double mouseY = Mouse.getY();
-        var drawContext = new DrawContext(uiShader, uiRenderer, view, proj, mouseX, mouseY);
+        var drawContext = new DrawContext(uiShader, uiRenderer, this.textRenderer, view, proj, mouseX, mouseY);
         HUDManager.render(drawContext);
 
         uiShader.unbind();
@@ -57,5 +59,6 @@ public record UIPass(Shader uiShader, UIRenderer uiRenderer) implements RenderPa
     public void cleanup() {
         HUDManager.cleanup();
         this.uiRenderer.cleanup();
+        this.textRenderer.cleanup();
     }
 }

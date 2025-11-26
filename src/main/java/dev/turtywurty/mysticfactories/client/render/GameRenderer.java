@@ -11,6 +11,7 @@ import dev.turtywurty.mysticfactories.client.render.world.entity.EntityRenderCon
 import dev.turtywurty.mysticfactories.client.render.world.tile.TileRenderContext;
 import dev.turtywurty.mysticfactories.client.shader.Shader;
 import dev.turtywurty.mysticfactories.client.shader.ShaderManager;
+import dev.turtywurty.mysticfactories.client.text.TextRenderer;
 import dev.turtywurty.mysticfactories.client.ui.UIRenderer;
 import dev.turtywurty.mysticfactories.client.window.Window;
 import dev.turtywurty.mysticfactories.client.world.ClientWorld;
@@ -39,12 +40,13 @@ public class GameRenderer {
 
         this.tileRenderContext = new TileRenderContext(texturedShader, camera);
         this.entityRenderContext = new EntityRenderContext(texturedShader, camera);
+        TextRenderer textRenderer = new TextRenderer(uiShader);
 
         this.renderContext = new RenderContext(camera, this.tileRenderContext, this.entityRenderContext, uiShader, window);
         this.pipeline = new RenderPipeline()
                 .addPass(new ClearPass(0.1f, 0.1f, 0.1f, 1.0f))
                 .addPass(new WorldPass())
-                .addPass(new UIPass(uiShader, new UIRenderer(uiShader)));
+                .addPass(new UIPass(uiShader, new UIRenderer(uiShader), textRenderer));
     }
 
     public void render(ClientWorld world, WorldRenderer worldRenderer) {

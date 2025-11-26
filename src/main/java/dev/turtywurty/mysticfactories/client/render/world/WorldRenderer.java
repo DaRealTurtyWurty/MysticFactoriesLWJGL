@@ -245,6 +245,7 @@ public class WorldRenderer {
     private record TileBatchMesh(int vao, int vbo, int ebo, int indexCount) {
         void render(TileRenderContext context) {
             context.shader().setUniform("uUseTexture", true);
+            context.shader().setUniform("uSampleAlphaOnly", false);
             context.shader().setUniform("uColor", new Vector4f(1f, 1f, 1f, 1f));
             context.shader().setUniform("uUVMin", new Vector2f(0f, 0f));
             context.shader().setUniform("uUVMax", new Vector2f(1f, 1f));
