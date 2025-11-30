@@ -1,6 +1,7 @@
 package dev.turtywurty.mysticfactories.client.ui.widget;
 
 import dev.turtywurty.mysticfactories.client.ui.DrawContext;
+import dev.turtywurty.mysticfactories.client.util.ColorHelper;
 import lombok.Setter;
 import org.lwjgl.glfw.GLFW;
 
@@ -42,13 +43,22 @@ public class ScrollBar extends Widget {
 
     @Override
     public void render(DrawContext context) {
-        context.drawRect(getX(), getY(), getWidth(), getHeight(), this.trackColor);
+        if (!isVisible())
+            return;
+
+        int track = isDisabled() ? ColorHelper.blendColors(this.trackColor, 0xFF000000, 0.35f) : this.trackColor;
+        int knob = isDisabled() ? ColorHelper.blendColors(this.knobColor, 0xFF000000, 0.35f) : this.knobColor;
+
+        context.drawRect(getX(), getY(), getWidth(), getHeight(), track);
         float knobY = knobTop();
-        context.drawRect(getX(), knobY, getWidth(), this.knobHeight, this.knobColor);
+        context.drawRect(getX(), knobY, getWidth(), this.knobHeight, knob);
     }
 
     @Override
     public void onMouseMove(double xPos, double yPos) {
+        if (!isVisible() || isDisabled())
+            return;
+
         this.lastMouseX = xPos;
         this.lastMouseY = yPos;
         if (!this.dragging)
@@ -60,6 +70,9 @@ public class ScrollBar extends Widget {
 
     @Override
     public void onMouseButtonPress(int button, int action, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT || action != GLFW.GLFW_PRESS)
             return;
 
@@ -71,7 +84,26 @@ public class ScrollBar extends Widget {
 
     @Override
     public void onMouseButtonRelease(int button, int action, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            this.dragging = false;
+        }
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (!visible) {
+            this.dragging = false;
+        }
+    }
+
+    @Override
+    public void setDisabled(boolean disabled) {
+        super.setDisabled(disabled);
+        if (disabled) {
             this.dragging = false;
         }
     }

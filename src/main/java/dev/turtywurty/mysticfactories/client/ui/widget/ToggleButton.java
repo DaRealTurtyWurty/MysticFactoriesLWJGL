@@ -3,6 +3,7 @@ package dev.turtywurty.mysticfactories.client.ui.widget;
 import dev.turtywurty.mysticfactories.client.text.FontAtlas;
 import dev.turtywurty.mysticfactories.client.text.Fonts;
 import dev.turtywurty.mysticfactories.client.ui.DrawContext;
+import dev.turtywurty.mysticfactories.client.util.ColorHelper;
 import lombok.Setter;
 
 import java.util.Objects;
@@ -93,6 +94,10 @@ public class ToggleButton extends AbstractButton {
         int hover = this.toggled ? this.onHoverColor : this.offHoverColor;
         int press = this.toggled ? this.onPressedColor : this.offPressedColor;
         int fill = pressed ? press : hovered ? hover : base;
+        if (isDisabled()) {
+            fill = ColorHelper.blendColors(fill, 0xFF000000, 0.35f);
+        }
+
         context.drawRect(getX(), getY(), getWidth(), getHeight(), fill);
 
         if (this.font != null) {
@@ -100,7 +105,8 @@ public class ToggleButton extends AbstractButton {
             float textWidth = this.font.measureTextWidth(label);
             float textX = getX() + (getWidth() - textWidth) * 0.5f;
             float textY = getY() + (getHeight() - this.font.getLineHeight()) * 0.5f;
-            context.drawText(this.font, label, textX, textY, this.textColor);
+            int drawColor = isDisabled() ? ColorHelper.withAlpha(this.textColor, 0.6f) : this.textColor;
+            context.drawText(this.font, label, textX, textY, drawColor);
         }
     }
 

@@ -65,6 +65,10 @@ public class ImageButton extends AbstractButton {
     @Override
     protected void renderButton(DrawContext context, boolean hovered, boolean pressed) {
         int tint = pressed ? this.pressedTint : hovered ? this.hoverTint : this.tintColor;
+        if (isDisabled()) {
+            tint = ColorHelper.blendColors(tint, 0xFF000000, 0.35f);
+        }
+
         float red = ColorHelper.getRed(tint);
         float green = ColorHelper.getGreen(tint);
         float blue = ColorHelper.getBlue(tint);
@@ -74,7 +78,8 @@ public class ImageButton extends AbstractButton {
         if (this.font != null && this.text != null) {
             float textX = getX() + this.textPaddingX;
             float textY = getY() + getHeight() * this.textBaselineOffset;
-            context.drawText(this.font, this.text, textX, textY, this.textColor);
+            int drawColor = isDisabled() ? ColorHelper.withAlpha(this.textColor, 0.6f) : this.textColor;
+            context.drawText(this.font, this.text, textX, textY, drawColor);
         }
     }
 

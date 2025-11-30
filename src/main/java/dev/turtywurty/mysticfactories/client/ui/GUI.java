@@ -1,6 +1,7 @@
 package dev.turtywurty.mysticfactories.client.ui;
 
 import dev.turtywurty.mysticfactories.client.input.InputListener;
+import dev.turtywurty.mysticfactories.client.ui.widget.Widget;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,6 +54,9 @@ public class GUI implements UIElement, InputListener {
     @Override
     public void preRender(DrawContext context) {
         for (UIElement widget : List.copyOf(this.widgets)) {
+            if (widget instanceof Widget w && !w.isVisible())
+                continue;
+
             widget.preRender(context);
         }
     }
@@ -60,6 +64,9 @@ public class GUI implements UIElement, InputListener {
     @Override
     public void render(DrawContext context) {
         for (UIElement widget : List.copyOf(this.widgets)) {
+            if (widget instanceof Widget w && !w.isVisible())
+                continue;
+
             widget.render(context);
         }
     }
@@ -67,6 +74,9 @@ public class GUI implements UIElement, InputListener {
     @Override
     public void postRender(DrawContext context) {
         for (UIElement widget : List.copyOf(this.widgets)) {
+            if (widget instanceof Widget w && !w.isVisible())
+                continue;
+
             widget.postRender(context);
         }
     }
@@ -156,6 +166,9 @@ public class GUI implements UIElement, InputListener {
 
     private void dispatchToWidgets(Consumer<InputListener> dispatcher) {
         for (UIElement widget : List.copyOf(this.widgets)) {
+            if (widget instanceof Widget w && (!w.isVisible() || w.isDisabled()))
+                continue;
+
             if (widget instanceof InputListener listener) {
                 dispatcher.accept(listener);
             }

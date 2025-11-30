@@ -1,6 +1,7 @@
 package dev.turtywurty.mysticfactories.client.ui.widget;
 
 import dev.turtywurty.mysticfactories.client.ui.DrawContext;
+import dev.turtywurty.mysticfactories.client.util.ColorHelper;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -60,6 +61,8 @@ public class DropdownWidget<T> extends Widget {
             this.selectedView = this.selectedFactory.apply(this.selected);
             this.selectedView.setPosition(getX(), getY());
             this.selectedView.setSize(getWidth(), getHeight());
+            this.selectedView.setVisible(isVisible());
+            this.selectedView.setDisabled(isDisabled());
         }
     }
 
@@ -96,6 +99,8 @@ public class DropdownWidget<T> extends Widget {
         }
 
         ScrollList list = listBuilder.build();
+        list.setVisible(isVisible());
+        list.setDisabled(isDisabled());
         float panelHeight = list.getHeight();
         float below = getY() + getHeight() + panelHeight;
         float screenHeight = this.lastScreenHeight > 0 ? this.lastScreenHeight : below + 1;
@@ -107,6 +112,9 @@ public class DropdownWidget<T> extends Widget {
 
     @Override
     public void preRender(DrawContext context) {
+        if (!isVisible())
+            return;
+
         if (this.selectedView != null) {
             this.selectedView.preRender(context);
         }
@@ -114,10 +122,15 @@ public class DropdownWidget<T> extends Widget {
 
     @Override
     public void render(DrawContext context) {
+        if (!isVisible())
+            return;
+
         this.lastScreenHeight = context.height();
-        context.drawRect(getX(), getY(), getWidth(), getHeight(), this.backgroundColor);
-        context.drawRect(getX(), getY(), getWidth(), 1f, this.borderColor);
-        context.drawRect(getX(), getY() + getHeight() - 1f, getWidth(), 1f, this.borderColor);
+        int bg = isDisabled() ? ColorHelper.blendColors(this.backgroundColor, 0xFF000000, 0.35f) : this.backgroundColor;
+        int border = isDisabled() ? ColorHelper.blendColors(this.borderColor, 0xFF000000, 0.35f) : this.borderColor;
+        context.drawRect(getX(), getY(), getWidth(), getHeight(), bg);
+        context.drawRect(getX(), getY(), getWidth(), 1f, border);
+        context.drawRect(getX(), getY() + getHeight() - 1f, getWidth(), 1f, border);
 
         if (this.selectedView != null) {
             this.selectedView.render(context);
@@ -126,6 +139,9 @@ public class DropdownWidget<T> extends Widget {
 
     @Override
     public void postRender(DrawContext context) {
+        if (!isVisible())
+            return;
+
         if (this.selectedView != null) {
             this.selectedView.postRender(context);
         }
@@ -135,11 +151,13 @@ public class DropdownWidget<T> extends Widget {
             float panelY = this.optionsView.getY();
             float panelWidth = this.optionsView.getWidth();
             float panelHeight = this.optionsView.getHeight();
-            context.drawRect(panelX, panelY, panelWidth, panelHeight, this.backgroundColor);
-            context.drawRect(panelX, panelY, panelWidth, 1f, this.borderColor);
-            context.drawRect(panelX, panelY + panelHeight - 1f, panelWidth, 1f, this.borderColor);
-            context.drawRect(panelX, panelY, 1f, panelHeight, this.borderColor);
-            context.drawRect(panelX + panelWidth - 1f, panelY, 1f, panelHeight, this.borderColor);
+            int panelBg = isDisabled() ? ColorHelper.blendColors(this.backgroundColor, 0xFF000000, 0.35f) : this.backgroundColor;
+            int panelBorder = isDisabled() ? ColorHelper.blendColors(this.borderColor, 0xFF000000, 0.35f) : this.borderColor;
+            context.drawRect(panelX, panelY, panelWidth, panelHeight, panelBg);
+            context.drawRect(panelX, panelY, panelWidth, 1f, panelBorder);
+            context.drawRect(panelX, panelY + panelHeight - 1f, panelWidth, 1f, panelBorder);
+            context.drawRect(panelX, panelY, 1f, panelHeight, panelBorder);
+            context.drawRect(panelX + panelWidth - 1f, panelY, 1f, panelHeight, panelBorder);
             this.optionsView.preRender(context);
             this.optionsView.render(context);
             this.optionsView.postRender(context);
@@ -148,6 +166,9 @@ public class DropdownWidget<T> extends Widget {
 
     @Override
     public void onMouseMove(double xPos, double yPos) {
+        if (!isVisible() || isDisabled())
+            return;
+
         this.lastMouseX = xPos;
         this.lastMouseY = yPos;
         if (this.selectedView != null) {
@@ -161,6 +182,9 @@ public class DropdownWidget<T> extends Widget {
 
     @Override
     public void onMouseButtonPress(int button, int action, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT)
             return;
 
@@ -172,7 +196,7 @@ public class DropdownWidget<T> extends Widget {
                     rebuildOptions();
                 }
             } else if (this.open && this.optionsView != null) {
-                if(this.optionsView.containsPoint(lastMouseX, lastMouseY)) {
+                if (this.optionsView.containsPoint(lastMouseX, lastMouseY)) {
                     this.optionsView.onMouseButtonPress(button, action, modifiers);
                 } else {
                     this.open = false;
@@ -183,6 +207,9 @@ public class DropdownWidget<T> extends Widget {
 
     @Override
     public void onMouseButtonRelease(int button, int action, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         if (this.open && !this.openedThisFrame && this.optionsView != null) {
             this.optionsView.onMouseButtonRelease(button, action, modifiers);
         }
@@ -192,6 +219,9 @@ public class DropdownWidget<T> extends Widget {
 
     @Override
     public void onMouseScroll(double xOffset, double yOffset) {
+        if (!isVisible() || isDisabled())
+            return;
+
         if (this.open && this.optionsView != null) {
             this.optionsView.onMouseScroll(xOffset, yOffset);
         }
@@ -199,6 +229,9 @@ public class DropdownWidget<T> extends Widget {
 
     @Override
     public void onKeyPress(int keyCode, int scanCode, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         if (this.open && this.optionsView != null) {
             this.optionsView.onKeyPress(keyCode, scanCode, modifiers);
         }
@@ -206,6 +239,9 @@ public class DropdownWidget<T> extends Widget {
 
     @Override
     public void onKeyRelease(int keyCode, int scanCode, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         if (this.open && this.optionsView != null) {
             this.optionsView.onKeyRelease(keyCode, scanCode, modifiers);
         }
@@ -213,6 +249,9 @@ public class DropdownWidget<T> extends Widget {
 
     @Override
     public void onUpdate(double deltaTime) {
+        if (!isVisible() || isDisabled())
+            return;
+
         if (this.selectedView != null) {
             this.selectedView.onUpdate(deltaTime);
         }
@@ -261,10 +300,48 @@ public class DropdownWidget<T> extends Widget {
     }
 
     private void toggleOpen() {
+        if (isDisabled()) {
+            return;
+        }
+
         this.open = !this.open;
         if (this.open && this.selectedView != null) {
             this.selectedView.setPosition(getX(), getY());
             this.selectedView.setSize(getWidth(), getHeight());
+        }
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (!visible) {
+            this.open = false;
+            this.openedThisFrame = false;
+        }
+
+        if (this.selectedView != null) {
+            this.selectedView.setVisible(visible);
+        }
+
+        if (this.optionsView != null) {
+            this.optionsView.setVisible(visible);
+        }
+    }
+
+    @Override
+    public void setDisabled(boolean disabled) {
+        super.setDisabled(disabled);
+        if (disabled) {
+            this.open = false;
+            this.openedThisFrame = false;
+        }
+
+        if (this.selectedView != null) {
+            this.selectedView.setDisabled(disabled);
+        }
+
+        if (this.optionsView != null) {
+            this.optionsView.setDisabled(disabled);
         }
     }
 
@@ -283,24 +360,36 @@ public class DropdownWidget<T> extends Widget {
 
         @Override
         public void preRender(DrawContext context) {
+            if (!isVisible())
+                return;
+
             syncView();
             this.view.preRender(context);
         }
 
         @Override
         public void render(DrawContext context) {
+            if (!isVisible())
+                return;
+
             syncView();
             this.view.render(context);
         }
 
         @Override
         public void postRender(DrawContext context) {
+            if (!isVisible())
+                return;
+
             syncView();
             this.view.postRender(context);
         }
 
         @Override
         public void onMouseButtonRelease(int button, int action, int modifiers) {
+            if (!isVisible() || isDisabled())
+                return;
+
             if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && containsPoint(this.lastMouseX, this.lastMouseY)) {
                 this.onClick.run();
             }
@@ -308,6 +397,9 @@ public class DropdownWidget<T> extends Widget {
 
         @Override
         public void onMouseMove(double xPos, double yPos) {
+            if (!isVisible() || isDisabled())
+                return;
+
             this.lastMouseX = xPos;
             this.lastMouseY = yPos;
             this.view.onMouseMove(xPos, yPos);
@@ -323,6 +415,18 @@ public class DropdownWidget<T> extends Widget {
         public void setSize(float width, float height) {
             super.setSize(width, height);
             syncView();
+        }
+
+        @Override
+        public void setVisible(boolean visible) {
+            super.setVisible(visible);
+            this.view.setVisible(visible);
+        }
+
+        @Override
+        public void setDisabled(boolean disabled) {
+            super.setDisabled(disabled);
+            this.view.setDisabled(disabled);
         }
 
         private void syncView() {

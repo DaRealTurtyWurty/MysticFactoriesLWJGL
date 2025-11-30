@@ -3,6 +3,7 @@ package dev.turtywurty.mysticfactories.client.ui.widget;
 import dev.turtywurty.mysticfactories.client.text.FontAtlas;
 import dev.turtywurty.mysticfactories.client.text.Fonts;
 import dev.turtywurty.mysticfactories.client.ui.DrawContext;
+import dev.turtywurty.mysticfactories.client.util.ColorHelper;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -31,7 +32,11 @@ public class TextLabel extends Widget {
 
     @Override
     public void render(DrawContext context) {
-        context.drawText(this.font, this.textSupplier.get(), getX(), getY(), this.color);
+        if (!isVisible())
+            return;
+
+        int drawColor = isDisabled() ? ColorHelper.blendColors(this.color, 0xFF000000, 0.35f) : this.color;
+        context.drawText(this.font, this.textSupplier.get(), getX(), getY(), drawColor);
     }
 
     public static class Builder {

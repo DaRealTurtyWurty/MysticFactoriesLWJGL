@@ -139,22 +139,37 @@ public class WidgetList extends Widget {
 
     @Override
     public void preRender(DrawContext context) {
+        if (!isVisible())
+            return;
+
         for (Widget child : children) {
-            child.preRender(context);
+            if (child.isVisible()) {
+                child.preRender(context);
+            }
         }
     }
 
     @Override
     public void render(DrawContext context) {
+        if (!isVisible())
+            return;
+
         for (Widget child : children) {
-            child.render(context);
+            if (child.isVisible()) {
+                child.render(context);
+            }
         }
     }
 
     @Override
     public void postRender(DrawContext context) {
+        if (!isVisible())
+            return;
+
         for (Widget child : children) {
-            child.postRender(context);
+            if (child.isVisible()) {
+                child.postRender(context);
+            }
         }
     }
 
@@ -163,8 +178,13 @@ public class WidgetList extends Widget {
      */
     @Override
     public void onKeyPress(int keyCode, int scanCode, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         for (Widget child : children) {
-            child.onKeyPress(keyCode, scanCode, modifiers);
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onKeyPress(keyCode, scanCode, modifiers);
+            }
         }
     }
 
@@ -173,8 +193,13 @@ public class WidgetList extends Widget {
      */
     @Override
     public void onKeyRelease(int keyCode, int scanCode, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         for (Widget child : children) {
-            child.onKeyRelease(keyCode, scanCode, modifiers);
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onKeyRelease(keyCode, scanCode, modifiers);
+            }
         }
     }
 
@@ -183,8 +208,13 @@ public class WidgetList extends Widget {
      */
     @Override
     public void onMouseMove(double xPos, double yPos) {
+        if (!isVisible() || isDisabled())
+            return;
+
         for (Widget child : children) {
-            child.onMouseMove(xPos, yPos);
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onMouseMove(xPos, yPos);
+            }
         }
     }
 
@@ -193,8 +223,13 @@ public class WidgetList extends Widget {
      */
     @Override
     public void onMouseScroll(double xOffset, double yOffset) {
+        if (!isVisible() || isDisabled())
+            return;
+
         for (Widget child : children) {
-            child.onMouseScroll(xOffset, yOffset);
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onMouseScroll(xOffset, yOffset);
+            }
         }
     }
 
@@ -203,8 +238,13 @@ public class WidgetList extends Widget {
      */
     @Override
     public void onMouseButtonPress(int button, int action, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         for (Widget child : children) {
-            child.onMouseButtonPress(button, action, modifiers);
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onMouseButtonPress(button, action, modifiers);
+            }
         }
     }
 
@@ -213,8 +253,13 @@ public class WidgetList extends Widget {
      */
     @Override
     public void onMouseButtonRelease(int button, int action, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         for (Widget child : children) {
-            child.onMouseButtonRelease(button, action, modifiers);
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onMouseButtonRelease(button, action, modifiers);
+            }
         }
     }
 
@@ -223,8 +268,13 @@ public class WidgetList extends Widget {
      */
     @Override
     public void onUpdate(double deltaTime) {
+        if (!isVisible() || isDisabled())
+            return;
+
         for (Widget child : children) {
-            child.onUpdate(deltaTime);
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onUpdate(deltaTime);
+            }
         }
     }
 
@@ -250,6 +300,14 @@ public class WidgetList extends Widget {
     public void setSize(float width, float height) {
         super.setSize(width, height);
         updateLayout();
+    }
+
+    @Override
+    public void setDisabled(boolean disabled) {
+        super.setDisabled(disabled);
+        for (Widget child : this.children) {
+            child.setDisabled(disabled);
+        }
     }
 
     public enum Orientation {

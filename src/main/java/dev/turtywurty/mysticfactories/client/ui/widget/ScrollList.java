@@ -130,8 +130,13 @@ public class ScrollList extends Widget {
 
     @Override
     public void preRender(DrawContext context) {
+        if (!isVisible())
+            return;
+
         for (Widget child : this.children) {
-            child.preRender(context);
+            if (child.isVisible()) {
+                child.preRender(context);
+            }
         }
 
         if (this.scrollNeeded && this.showScrollBar) {
@@ -141,11 +146,14 @@ public class ScrollList extends Widget {
 
     @Override
     public void render(DrawContext context) {
+        if (!isVisible())
+            return;
+
         ScissorState scissorState = applyScissor(context);
         try {
             if (scissorState != null) {
                 for (Widget child : this.children) {
-                    if (child.getY() + child.getHeight() < getY() || child.getY() > getY() + getHeight())
+                    if (!child.isVisible() || child.getY() + child.getHeight() < getY() || child.getY() > getY() + getHeight())
                         continue; // skip anything outside viewport
 
                     child.render(context);
@@ -164,8 +172,13 @@ public class ScrollList extends Widget {
 
     @Override
     public void postRender(DrawContext context) {
+        if (!isVisible())
+            return;
+
         for (Widget child : this.children) {
-            child.postRender(context);
+            if (child.isVisible()) {
+                child.postRender(context);
+            }
         }
 
         if (this.scrollNeeded && this.showScrollBar) {
@@ -175,6 +188,9 @@ public class ScrollList extends Widget {
 
     @Override
     public void onMouseScroll(double xOffset, double yOffset) {
+        if (!isVisible() || isDisabled())
+            return;
+
         if (this.scrollNeeded) {
             this.scrollOffset += (float) (yOffset * this.scrollSpeed);
             updateLayout();
@@ -184,14 +200,21 @@ public class ScrollList extends Widget {
         }
 
         for (Widget child : this.children) {
-            child.onMouseScroll(xOffset, yOffset);
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onMouseScroll(xOffset, yOffset);
+            }
         }
     }
 
     @Override
     public void onMouseMove(double xPos, double yPos) {
+        if (!isVisible() || isDisabled())
+            return;
+
         for (Widget child : this.children) {
-            child.onMouseMove(xPos, yPos);
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onMouseMove(xPos, yPos);
+            }
         }
 
         if (this.scrollNeeded && this.showScrollBar) {
@@ -201,8 +224,13 @@ public class ScrollList extends Widget {
 
     @Override
     public void onMouseButtonPress(int button, int action, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         for (Widget child : this.children) {
-            child.onMouseButtonPress(button, action, modifiers);
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onMouseButtonPress(button, action, modifiers);
+            }
         }
 
         if (this.scrollNeeded && this.showScrollBar) {
@@ -212,8 +240,13 @@ public class ScrollList extends Widget {
 
     @Override
     public void onMouseButtonRelease(int button, int action, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         for (Widget child : this.children) {
-            child.onMouseButtonRelease(button, action, modifiers);
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onMouseButtonRelease(button, action, modifiers);
+            }
         }
 
         if (this.scrollNeeded && this.showScrollBar) {
@@ -223,26 +256,56 @@ public class ScrollList extends Widget {
 
     @Override
     public void onKeyPress(int keyCode, int scanCode, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         for (Widget child : this.children) {
-            child.onKeyPress(keyCode, scanCode, modifiers);
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onKeyPress(keyCode, scanCode, modifiers);
+            }
         }
     }
 
     @Override
     public void onKeyRelease(int keyCode, int scanCode, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         for (Widget child : this.children) {
-            child.onKeyRelease(keyCode, scanCode, modifiers);
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onKeyRelease(keyCode, scanCode, modifiers);
+            }
         }
     }
 
     @Override
     public void onUpdate(double deltaTime) {
+        if (!isVisible() || isDisabled())
+            return;
+
         for (Widget child : this.children) {
-            child.onUpdate(deltaTime);
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onUpdate(deltaTime);
+            }
         }
 
         if (this.scrollNeeded && this.showScrollBar) {
             this.scrollBar.onUpdate(deltaTime);
+        }
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        this.scrollBar.setVisible(visible);
+    }
+
+    @Override
+    public void setDisabled(boolean disabled) {
+        super.setDisabled(disabled);
+        this.scrollBar.setDisabled(disabled);
+        for (Widget child : this.children) {
+            child.setDisabled(disabled);
         }
     }
 

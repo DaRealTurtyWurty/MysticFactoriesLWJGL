@@ -16,6 +16,10 @@ public abstract class Widget implements UIElement, InputListener {
     private float y;
     private float width;
     private float height;
+    @Setter
+    private boolean visible = true;
+    @Setter
+    private boolean disabled;
 
     protected Widget(float x, float y, float width, float height) {
         this.x = x;
@@ -47,6 +51,9 @@ public abstract class Widget implements UIElement, InputListener {
     }
 
     public boolean containsPoint(double px, double py) {
+        if (!this.visible || this.disabled)
+            return false;
+
         return px >= this.x && px <= this.x + this.width && py >= this.y && py <= this.y + this.height;
     }
 }

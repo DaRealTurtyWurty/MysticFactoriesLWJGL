@@ -20,8 +20,12 @@ public abstract class AbstractButton extends Widget {
 
     @Override
     public final void render(DrawContext context) {
-        this.hovered = isInside(context.mouseX(), context.mouseY());
-        renderButton(context, this.hovered, this.pressed);
+        if (!isVisible())
+            return;
+
+        this.hovered = !isDisabled() && isInside(context.mouseX(), context.mouseY());
+        boolean pressedState = !isDisabled() && this.pressed;
+        renderButton(context, this.hovered, pressedState);
     }
 
     /**
@@ -37,13 +41,37 @@ public abstract class AbstractButton extends Widget {
     }
 
     @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (!visible) {
+            this.hovered = false;
+            this.pressed = false;
+        }
+    }
+
+    @Override
+    public void setDisabled(boolean disabled) {
+        super.setDisabled(disabled);
+        if (disabled) {
+            this.hovered = false;
+            this.pressed = false;
+        }
+    }
+
+    @Override
     public void onMouseMove(double xPos, double yPos) {
+        if (!isVisible() || isDisabled())
+            return;
+
         this.mouseX = xPos;
         this.mouseY = yPos;
     }
 
     @Override
     public void onMouseButtonPress(int button, int action, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT || action != GLFW.GLFW_PRESS)
             return;
 
@@ -54,6 +82,9 @@ public abstract class AbstractButton extends Widget {
 
     @Override
     public void onMouseButtonRelease(int button, int action, int modifiers) {
+        if (!isVisible() || isDisabled())
+            return;
+
         if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT)
             return;
 
@@ -68,7 +99,7 @@ public abstract class AbstractButton extends Widget {
      * @return true if the provided mouse coordinates are within the button bounds.
      */
     protected boolean isInside(double mouseX, double mouseY) {
-        return mouseX >= getX() && mouseX <= getX() + getWidth() &&
+        return isVisible() && !isDisabled() && mouseX >= getX() && mouseX <= getX() + getWidth() &&
                 mouseY >= getY() && mouseY <= getY() + getHeight();
     }
 }

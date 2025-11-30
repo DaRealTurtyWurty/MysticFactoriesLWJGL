@@ -3,6 +3,7 @@ package dev.turtywurty.mysticfactories.client.ui.widget;
 import dev.turtywurty.mysticfactories.client.text.FontAtlas;
 import dev.turtywurty.mysticfactories.client.text.Fonts;
 import dev.turtywurty.mysticfactories.client.ui.DrawContext;
+import dev.turtywurty.mysticfactories.client.util.ColorHelper;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -69,12 +70,17 @@ public class Button extends AbstractButton {
     @Override
     protected void renderButton(DrawContext context, boolean hovered, boolean pressed) {
         int fill = pressed ? this.pressedColor : hovered ? this.hoverColor : this.backgroundColor;
+        if (isDisabled()) {
+            fill = ColorHelper.blendColors(fill, 0xFF000000, 0.35f);
+        }
+
         context.drawRect(getX(), getY(), getWidth(), getHeight(), fill);
 
         float textWidth = this.font.measureTextWidth(this.text);
         float textX = getX() + (getWidth() - textWidth) * 0.5f;
         float textY = getY() + (getHeight() - this.font.getLineHeight()) * 0.5f;
-        context.drawText(this.font, this.text, textX, textY, this.textColor);
+        int drawColor = isDisabled() ? ColorHelper.withAlpha(this.textColor, 0.6f) : this.textColor;
+        context.drawText(this.font, this.text, textX, textY, drawColor);
     }
 
     @Override
