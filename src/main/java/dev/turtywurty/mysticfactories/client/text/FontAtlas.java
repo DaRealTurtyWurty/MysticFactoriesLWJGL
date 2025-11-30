@@ -170,6 +170,47 @@ public class FontAtlas {
         this.fontInfo.free();
     }
 
+    /**
+     * Computes the width in pixels of the provided text, including kerning and respecting newlines.
+     * Returns the longest line width for multi-line strings.
+     */
+    public float measureTextWidth(String text) {
+        if (text == null || text.isEmpty()) {
+            return 0f;
+        }
+
+        float maxWidth = 0f;
+        float x = 0f;
+
+        Glyph previousGlyph = null;
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '\n') {
+                maxWidth = Math.max(maxWidth, x);
+                x = 0f;
+                previousGlyph = null;
+                continue;
+            }
+
+            Glyph glyph = getGlyph(c);
+            if (glyph == null) {
+                previousGlyph = null;
+                continue;
+            }
+
+            if (previousGlyph != null) {
+                int kernAdvance = STBTruetype.stbtt_GetCodepointKernAdvance(this.fontInfo, previousGlyph.codepoint(), glyph.codepoint());
+                x += kernAdvance * this.scale;
+            }
+
+            x += glyph.advance();
+            previousGlyph = glyph;
+        }
+
+        maxWidth = Math.max(maxWidth, x);
+        return maxWidth;
+    }
+
     public float getLineHeight() {
         return ascent - descent + lineGap;
     }
