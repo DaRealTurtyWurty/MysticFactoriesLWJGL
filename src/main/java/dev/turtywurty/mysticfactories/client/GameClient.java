@@ -9,9 +9,10 @@ import dev.turtywurty.mysticfactories.client.render.world.entity.BasicEntityRend
 import dev.turtywurty.mysticfactories.client.render.world.entity.EntityRendererRegistry;
 import dev.turtywurty.mysticfactories.client.settings.Settings;
 import dev.turtywurty.mysticfactories.client.text.Fonts;
-import dev.turtywurty.mysticfactories.client.ui.HUDManager;
-import dev.turtywurty.mysticfactories.client.ui.widget.TextLabel;
 import dev.turtywurty.mysticfactories.client.ui.GUIStack;
+import dev.turtywurty.mysticfactories.client.ui.HUDManager;
+import dev.turtywurty.mysticfactories.client.ui.MainMenuGUI;
+import dev.turtywurty.mysticfactories.client.ui.widget.TextLabel;
 import dev.turtywurty.mysticfactories.client.window.Window;
 import dev.turtywurty.mysticfactories.client.world.ClientWorld;
 import dev.turtywurty.mysticfactories.client.world.LocalWorldConnection;
@@ -44,11 +45,13 @@ public class GameClient implements Runnable {
     private @Nullable IntegratedServer integratedServer; // null when connected to remote
     private ClientWorld clientWorld;
     private WorldRenderer worldRenderer;
+    private boolean worldStarted;
 
     public GameClient() {
         this.settings = Settings.load();
         this.window = new Window("Mystic Factories", this.settings);
         this.gameThread = new Thread(this, "client-thread");
+        this.worldStarted = false;
     }
 
     public void start() {
@@ -72,8 +75,9 @@ public class GameClient implements Runnable {
         GUIStack.onResize(this.window.getWidth(), this.window.getHeight());
         this.inputManager = new InputManager(this.camera, this.window);
         Fonts.init();
+        this.gameRenderer = new GameRenderer(this.camera, this.window);
 
-        setupWorldsAndRenderers();
+        GUIStack.push(new MainMenuGUI(() -> startGameWorld()));
     }
 
     private void loop() {
@@ -183,7 +187,12 @@ public class GameClient implements Runnable {
         this.window.destroy();
     }
 
-    private void setupWorldsAndRenderers() {
+    private void startGameWorld() {
+        if (this.worldStarted)
+            return;
+
+        this.worldStarted = true;
+
         this.tileRegistry = new TileRegistry();
         TileTypes.register(this.tileRegistry);
         var entityTypeRegistry = new EntityTypeRegistry();
@@ -221,8 +230,6 @@ public class GameClient implements Runnable {
         this.clientWorld.getLocalPlayer().ifPresent(this.camera::setFollowTarget);
         this.inputManager.addListener(new PlayerInputController(this.clientWorld));
 
-        this.gameRenderer = new GameRenderer(this.camera, this.window);
-
         HUDManager.addLastElement(Identifier.of("debug_position"),
                 new TextLabel(Fonts.defaultFont(),
                         () -> String.format("X: %.2f, Y: %.2f",
@@ -234,5 +241,7 @@ public class GameClient implements Runnable {
                                         .orElse(0.0)),
                         8f,
                         8f));
+
+        GUIStack.pop();
     }
 }

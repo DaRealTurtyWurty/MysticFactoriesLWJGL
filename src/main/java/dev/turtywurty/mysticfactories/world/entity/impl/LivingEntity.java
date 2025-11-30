@@ -1,7 +1,9 @@
 package dev.turtywurty.mysticfactories.world.entity.impl;
 
 import dev.turtywurty.mysticfactories.world.World;
-import dev.turtywurty.mysticfactories.world.entity.*;
+import dev.turtywurty.mysticfactories.world.entity.Entity;
+import dev.turtywurty.mysticfactories.world.entity.EntityType;
+import dev.turtywurty.mysticfactories.world.entity.RemovalReason;
 import dev.turtywurty.mysticfactories.world.entity.attribs.AttributeKey;
 import dev.turtywurty.mysticfactories.world.entity.attribs.AttributeKeys;
 import dev.turtywurty.mysticfactories.world.entity.attribs.AttributeMap;
@@ -46,7 +48,8 @@ public abstract class LivingEntity extends Entity {
     }
 
     @Override
-    public void onRemovedFromWorld(World world, RemovalReason reason) {}
+    public void onRemovedFromWorld(World world, RemovalReason reason) {
+    }
 
     public void onDeath() {
         remove(RemovalReason.KILLED);
@@ -78,7 +81,8 @@ public abstract class LivingEntity extends Entity {
         return this.attributes.get(key).getBaseValue();
     }
 
-    public void onHurt(float amount, boolean died) {}
+    public void onHurt(float amount, boolean died) {
+    }
 
     public abstract AttributeMap.Builder createAttributes();
 

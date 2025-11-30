@@ -8,7 +8,8 @@ import dev.turtywurty.mysticfactories.world.entity.impl.PlayerEntity;
 public class EntityTypes {
     public static EntityType<PlayerEntity> PLAYER;
 
-    private EntityTypes() {}
+    private EntityTypes() {
+    }
 
     public static void register(EntityTypeRegistry registry) {
         PLAYER = registry.register(new EntityType.Builder<PlayerEntity>(Identifier.of("player"))

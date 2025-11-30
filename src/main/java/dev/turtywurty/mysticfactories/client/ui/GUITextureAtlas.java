@@ -2,11 +2,7 @@ package dev.turtywurty.mysticfactories.client.ui;
 
 import dev.turtywurty.mysticfactories.util.Identifier;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL46;
+import org.lwjgl.opengl.*;
 import org.lwjgl.stb.STBImage;
 
 import java.io.IOException;
@@ -19,7 +15,6 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -64,7 +59,7 @@ public record GUITextureAtlas(int textureId, int width, int height, Map<Identifi
     private static GUITextureAtlas buildInternal(String modid) {
         Map<Identifier, ImageData> images = loadImages(modid);
         if (images.isEmpty())
-            throw new IllegalStateException("No GUI textures found for modid '" + modid + "'");
+            return createFallbackAtlas();
 
         int atlasWidth = images.values().stream().mapToInt(img -> img.width).max().orElse(1);
         int atlasHeight = images.values().stream().mapToInt(img -> img.height).sum();
@@ -209,6 +204,22 @@ public record GUITextureAtlas(int textureId, int width, int height, Map<Identifi
 
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
         return textureId;
+    }
+
+    private static GUITextureAtlas createFallbackAtlas() {
+        ByteBuffer pixel = BufferUtils.createByteBuffer(4);
+        pixel.put((byte) 0xFF).put((byte) 0xFF).put((byte) 0xFF).put((byte) 0xFF).flip();
+
+        int textureId = GL11.glGenTextures();
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureId);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, 1, 1, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, pixel);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+
+        return new GUITextureAtlas(textureId, 1, 1, Collections.emptyMap());
     }
 
     public record UV(float u0, float v0, float u1, float v1) {

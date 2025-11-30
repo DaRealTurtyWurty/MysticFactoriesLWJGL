@@ -1,9 +1,7 @@
 package dev.turtywurty.mysticfactories.client.world;
 
-import dev.turtywurty.mysticfactories.client.render.world.WorldRenderer;
 import dev.turtywurty.mysticfactories.world.*;
 import dev.turtywurty.mysticfactories.world.entity.Entity;
-import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Map;

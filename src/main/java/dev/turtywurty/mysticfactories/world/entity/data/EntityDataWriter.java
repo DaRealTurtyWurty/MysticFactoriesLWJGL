@@ -100,7 +100,7 @@ public class EntityDataWriter<T> {
 
     private <V> T encodeOrThrow(Codec<V> codec, V value, String key) {
         return codec.encodeStart(this.ops, value)
-            .getOrThrow(asError("Failed to encode field '" + key + "'"));
+                .getOrThrow(asError("Failed to encode field '" + key + "'"));
     }
 
     private Function<String, RuntimeException> asError(String prefix) {

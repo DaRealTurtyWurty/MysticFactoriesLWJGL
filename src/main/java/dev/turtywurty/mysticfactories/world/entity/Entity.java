@@ -82,9 +82,12 @@ public abstract class Entity {
     public abstract AABB getAABB();
 
     public abstract void tick(double delta);
+
     public abstract void onAddedToWorld();
+
     public abstract void onRemovedFromWorld(World world, RemovalReason reason);
 
     public abstract void writeData(EntityDataWriter<?> writer);
+
     public abstract void readData(EntityDataReader<?> reader);
 }

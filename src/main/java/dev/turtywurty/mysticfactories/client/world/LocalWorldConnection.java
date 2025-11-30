@@ -1,12 +1,12 @@
 package dev.turtywurty.mysticfactories.client.world;
 
-import dev.turtywurty.mysticfactories.world.tile.TilePos;
-import dev.turtywurty.mysticfactories.world.tile.TileType;
-import dev.turtywurty.mysticfactories.world.entity.Entity;
 import dev.turtywurty.mysticfactories.world.Chunk;
 import dev.turtywurty.mysticfactories.world.ChunkPos;
 import dev.turtywurty.mysticfactories.world.WorldConnection;
 import dev.turtywurty.mysticfactories.world.WorldType;
+import dev.turtywurty.mysticfactories.world.entity.Entity;
+import dev.turtywurty.mysticfactories.world.tile.TilePos;
+import dev.turtywurty.mysticfactories.world.tile.TileType;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 

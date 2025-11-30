@@ -1,11 +1,11 @@
 package dev.turtywurty.mysticfactories.world;
 
+import dev.turtywurty.mysticfactories.world.entity.Entity;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
 import dev.turtywurty.mysticfactories.world.tile.TileType;
-import dev.turtywurty.mysticfactories.world.entity.Entity;
 
-import java.util.UUID;
 import java.util.Map;
+import java.util.UUID;
 
 public interface WorldConnection {
     /**

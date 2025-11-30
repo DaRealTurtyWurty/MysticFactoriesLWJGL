@@ -1,7 +1,7 @@
 package dev.turtywurty.mysticfactories.client.render.world.tile;
 
-import dev.turtywurty.mysticfactories.world.tile.TileType;
 import dev.turtywurty.mysticfactories.util.Identifier;
+import dev.turtywurty.mysticfactories.world.tile.TileType;
 
 import java.util.HashMap;
 import java.util.HashSet;

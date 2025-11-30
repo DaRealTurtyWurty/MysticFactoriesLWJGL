@@ -51,9 +51,9 @@ public class Button extends AbstractButton {
         int fill = pressed ? this.pressedColor : hovered ? this.hoverColor : this.backgroundColor;
         context.drawRect(getX(), getY(), getWidth(), getHeight(), fill);
 
-        // Render text with a small padding; exact centering is avoided due to missing metrics.
-        float textX = getX() + 6f;
-        float textY = getY() + getHeight() * 0.6f;
+        float textWidth = context.measureTextWidth(this.font, this.text);
+        float textX = getX() + (getWidth() - textWidth) * 0.5f;
+        float textY = getY() + (getHeight() - this.font.getLineHeight()) * 0.5f;
         context.drawText(this.font, this.text, textX, textY, this.textColor);
     }
 

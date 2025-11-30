@@ -2,6 +2,7 @@ package dev.turtywurty.mysticfactories.client.ui;
 
 import dev.turtywurty.mysticfactories.client.shader.Shader;
 import dev.turtywurty.mysticfactories.client.text.FontAtlas;
+import dev.turtywurty.mysticfactories.client.text.TextMeshBuilder;
 import dev.turtywurty.mysticfactories.client.text.TextRenderer;
 import dev.turtywurty.mysticfactories.client.util.ColorHelper;
 import dev.turtywurty.mysticfactories.util.Identifier;
@@ -304,6 +305,21 @@ public class DrawContext {
      */
     public void drawText(FontAtlas font, String text, float x, float y) {
         drawText(font, text, x, y, 0xFFFFFFFF);
+    }
+
+    /**
+     * Measure the width in pixels of the provided text using the given font.
+     * Returns the longest line width for multi-line strings.
+     *
+     * @param font font atlas to use
+     * @param text string to measure
+     * @return width in pixels
+     */
+    public float measureTextWidth(FontAtlas font, String text) {
+        if (font == null || text == null || text.isEmpty())
+            return 0f;
+
+        return TextMeshBuilder.measureWidth(font, text);
     }
 
     /**

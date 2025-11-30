@@ -93,4 +93,40 @@ public class TextMeshBuilder {
 
         return vertices;
     }
+
+    /**
+     * Computes the width in pixels of the provided text using the given font, including kerning and newlines.
+     */
+    public static float measureWidth(FontAtlas font, String text) {
+        float maxWidth = 0f;
+        float x = 0f;
+
+        FontAtlas.Glyph previousGlyph = null;
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '\n') {
+                maxWidth = Math.max(maxWidth, x);
+                x = 0f;
+                previousGlyph = null;
+                continue;
+            }
+
+            FontAtlas.Glyph glyph = font.getGlyph(c);
+            if (glyph == null) {
+                previousGlyph = null;
+                continue;
+            }
+
+            if (previousGlyph != null) {
+                int kernAdvance = STBTruetype.stbtt_GetCodepointKernAdvance(font.getFontInfo(), previousGlyph.codepoint(), glyph.codepoint());
+                x += kernAdvance * font.getScale();
+            }
+
+            x += glyph.advance();
+            previousGlyph = glyph;
+        }
+
+        maxWidth = Math.max(maxWidth, x);
+        return maxWidth;
+    }
 }
