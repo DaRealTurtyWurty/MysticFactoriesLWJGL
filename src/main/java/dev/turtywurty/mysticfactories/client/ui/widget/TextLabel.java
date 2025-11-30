@@ -29,14 +29,6 @@ public class TextLabel extends Widget {
         return new TextLabel.Builder();
     }
 
-    public TextLabel(FontAtlas font, String text, float x, float y, int color) {
-        this(font, () -> text, x, y, color);
-    }
-
-    public TextLabel(FontAtlas font, String text, float x, float y) {
-        this(font, () -> text, x, y, 0xFFFFFFFF);
-    }
-
     @Override
     public void render(DrawContext context) {
         context.drawText(this.font, this.textSupplier.get(), getX(), getY(), this.color);
@@ -115,7 +107,15 @@ public class TextLabel extends Widget {
         }
 
         public TextLabel build() {
-            return new TextLabel(this.font, this.textSupplier, this.x, this.y, this.color);
+            if (this.font == null)
+                throw new IllegalStateException("Font must be set on TextLabel builder");
+
+            var label = new TextLabel(this.font, this.textSupplier, this.x, this.y, this.color);
+            String sample = this.textSupplier != null ? this.textSupplier.get() : "";
+            float width = this.font.measureTextWidth(sample);
+            float height = this.font.getLineHeight();
+            label.setSize(width, height);
+            return label;
         }
     }
 }

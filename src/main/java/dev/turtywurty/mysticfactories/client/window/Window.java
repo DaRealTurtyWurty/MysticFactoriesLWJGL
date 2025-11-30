@@ -2,6 +2,7 @@ package dev.turtywurty.mysticfactories.client.window;
 
 import dev.turtywurty.mysticfactories.client.input.Keyboard;
 import dev.turtywurty.mysticfactories.client.input.Mouse;
+import dev.turtywurty.mysticfactories.client.settings.ResolutionPreset;
 import dev.turtywurty.mysticfactories.client.settings.Settings;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,10 +19,10 @@ public class Window {
     private long id;
     @Getter
     private final String title;
-    @Getter
-    private final Settings settings;
     @Setter
     private boolean resized;
+    private int framebufferWidth;
+    private int framebufferHeight;
 
     private final Keyboard keyboardCallback;
     private final Mouse.MouseButtonCallback mouseButtonCallback;
@@ -29,9 +30,8 @@ public class Window {
     private final Mouse.ScrollCallback scrollCallback;
     private final GLFWWindowSizeCallback windowSizeCallback;
 
-    public Window(String title, Settings settings) {
+    public Window(String title) {
         this.title = title;
-        this.settings = settings;
         this.resized = false;
 
         this.keyboardCallback = new Keyboard();
@@ -41,10 +41,11 @@ public class Window {
         this.windowSizeCallback = new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
-                Window.this.settings.setWindowWidth(width);
-                Window.this.settings.setWindowHeight(height);
+                Settings.getInstance().setWindowWidth(width);
+                Settings.getInstance().setWindowHeight(height);
+                Window.this.updateFramebufferSize();
                 Window.this.resized = true;
-                GL11.glViewport(0, 0, width, height);
+                GL11.glViewport(0, 0, Window.this.framebufferWidth, Window.this.framebufferHeight);
             }
         };
     }
@@ -63,11 +64,11 @@ public class Window {
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
 
-        switch (this.settings.getFullscreenMode()) {
+        switch (Settings.getInstance().getFullscreenMode()) {
             case FULLSCREEN -> {
                 GLFWVidMode vidMode = getVideoMode();
-                this.settings.setWindowWidth(vidMode.width());
-                this.settings.setWindowHeight(vidMode.height());
+                Settings.getInstance().setWindowWidth(vidMode.width());
+                Settings.getInstance().setWindowHeight(vidMode.height());
             }
             case BORDERLESS -> {
                 GLFWVidMode vidMode = getVideoMode();
@@ -75,16 +76,16 @@ public class Window {
                 GLFW.glfwWindowHint(GLFW.GLFW_GREEN_BITS, vidMode.greenBits());
                 GLFW.glfwWindowHint(GLFW.GLFW_BLUE_BITS, vidMode.blueBits());
                 GLFW.glfwWindowHint(GLFW.GLFW_REFRESH_RATE, vidMode.refreshRate());
-                this.settings.setWindowWidth(vidMode.width());
-                this.settings.setWindowHeight(vidMode.height());
+                Settings.getInstance().setWindowWidth(vidMode.width());
+                Settings.getInstance().setWindowHeight(vidMode.height());
             }
         }
 
-        long monitor = switch (this.settings.getFullscreenMode()) {
+        long monitor = switch (Settings.getInstance().getFullscreenMode()) {
             case WINDOWED -> MemoryUtil.NULL;
             case FULLSCREEN, BORDERLESS -> GLFW.glfwGetPrimaryMonitor();
         };
-        this.id = GLFW.glfwCreateWindow(this.settings.getWindowWidth(), this.settings.getWindowHeight(), this.title, monitor, MemoryUtil.NULL);
+        this.id = GLFW.glfwCreateWindow(Settings.getInstance().getWindowWidth(), Settings.getInstance().getWindowHeight(), this.title, monitor, MemoryUtil.NULL);
         if (this.id == MemoryUtil.NULL)
             throw new RuntimeException("Failed to create GLFW window!");
 
@@ -96,10 +97,11 @@ public class Window {
 
         GLFW.glfwMakeContextCurrent(this.id);
         GL.createCapabilities();
+        updateFramebufferSize();
 
         GL11.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-        setVsync(this.settings.isVsync());
+        setVsync(Settings.getInstance().isVsync());
         GLFW.glfwShowWindow(this.id);
     }
 
@@ -113,16 +115,25 @@ public class Window {
     }
 
     public void setVsync(boolean vsync) {
-        this.settings.setVsync(vsync);
+        Settings.getInstance().setVsync(vsync);
         GLFW.glfwSwapInterval(vsync ? 1 : 0);
     }
 
     public void setResolution(int newWidth, int newHeight) {
         GLFW.glfwSetWindowSize(this.id, newWidth, newHeight);
-        GL11.glViewport(0, 0, newWidth, newHeight);
-        this.settings.setWindowWidth(newWidth);
-        this.settings.setWindowHeight(newHeight);
+        Settings.getInstance().setWindowWidth(newWidth);
+        Settings.getInstance().setWindowHeight(newHeight);
+        updateFramebufferSize();
+        GL11.glViewport(0, 0, this.framebufferWidth, this.framebufferHeight);
         this.resized = true;
+    }
+
+    public void setResolutionPreset(ResolutionPreset preset) {
+        if (preset == null)
+            return;
+
+        Settings.getInstance().setResolutionPreset(preset);
+        setResolution(preset.getWidth(), preset.getHeight());
     }
 
     public void update() {
@@ -158,16 +169,32 @@ public class Window {
         return resized;
     }
 
+    private void updateFramebufferSize() {
+        int[] fbw = new int[1];
+        int[] fbh = new int[1];
+        GLFW.glfwGetFramebufferSize(this.id, fbw, fbh);
+        this.framebufferWidth = fbw[0];
+        this.framebufferHeight = fbh[0];
+    }
+
     public static long getCurrentWindowId() {
         return GLFW.glfwGetCurrentContext();
     }
 
     public int getWidth() {
-        return this.settings.getWindowWidth();
+        return Settings.getInstance().getWindowWidth();
     }
 
     public int getHeight() {
-        return this.settings.getWindowHeight();
+        return Settings.getInstance().getWindowHeight();
+    }
+
+    public int getFramebufferWidth() {
+        return this.framebufferWidth;
+    }
+
+    public int getFramebufferHeight() {
+        return this.framebufferHeight;
     }
 }
 

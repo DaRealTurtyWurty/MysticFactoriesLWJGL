@@ -45,4 +45,8 @@ public abstract class Widget implements UIElement, InputListener {
         this.width = width;
         this.height = height;
     }
+
+    public boolean containsPoint(double px, double py) {
+        return px >= this.x && px <= this.x + this.width && py >= this.y && py <= this.y + this.height;
+    }
 }

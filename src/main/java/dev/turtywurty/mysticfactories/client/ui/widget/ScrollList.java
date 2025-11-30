@@ -2,6 +2,8 @@ package dev.turtywurty.mysticfactories.client.ui.widget;
 
 import dev.turtywurty.mysticfactories.client.ui.DrawContext;
 import lombok.Setter;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.system.MemoryStack;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -127,12 +129,32 @@ public class ScrollList extends Widget {
     }
 
     @Override
-    public void render(DrawContext context) {
+    public void preRender(DrawContext context) {
         for (Widget child : this.children) {
-            if (child.getY() + child.getHeight() < getY() || child.getY() > getY() + getHeight())
-                continue; // skip anything outside viewport
+            child.preRender(context);
+        }
 
-            child.render(context);
+        if (this.scrollNeeded && this.showScrollBar) {
+            this.scrollBar.preRender(context);
+        }
+    }
+
+    @Override
+    public void render(DrawContext context) {
+        ScissorState scissorState = applyScissor(context);
+        try {
+            if (scissorState != null) {
+                for (Widget child : this.children) {
+                    if (child.getY() + child.getHeight() < getY() || child.getY() > getY() + getHeight())
+                        continue; // skip anything outside viewport
+
+                    child.render(context);
+                }
+            }
+        } finally {
+            if (scissorState != null) {
+                restoreScissor(scissorState);
+            }
         }
 
         if (this.scrollNeeded && this.showScrollBar) {
@@ -141,9 +163,20 @@ public class ScrollList extends Widget {
     }
 
     @Override
+    public void postRender(DrawContext context) {
+        for (Widget child : this.children) {
+            child.postRender(context);
+        }
+
+        if (this.scrollNeeded && this.showScrollBar) {
+            this.scrollBar.postRender(context);
+        }
+    }
+
+    @Override
     public void onMouseScroll(double xOffset, double yOffset) {
         if (this.scrollNeeded) {
-            this.scrollOffset -= (float) (yOffset * this.scrollSpeed);
+            this.scrollOffset += (float) (yOffset * this.scrollSpeed);
             updateLayout();
             if (this.showScrollBar) {
                 this.scrollBar.onMouseScroll(xOffset, yOffset);
@@ -235,6 +268,47 @@ public class ScrollList extends Widget {
     public void setSize(float width, float height) {
         super.setSize(width, height);
         updateLayout();
+    }
+
+    private ScissorState applyScissor(DrawContext context) {
+        float x0 = Math.max(0f, getX());
+        float y0 = Math.max(0f, getY());
+        float x1 = Math.min(context.width(), getX() + getWidth());
+        float y1 = Math.min(context.height(), getY() + getHeight());
+
+        float scissorWidth = x1 - x0;
+        float scissorHeight = y1 - y0;
+        if (scissorWidth <= 0f || scissorHeight <= 0f) {
+            return null;
+        }
+
+        boolean wasEnabled = GL11.glIsEnabled(GL11.GL_SCISSOR_TEST);
+        int prevX, prevY, prevWidth, prevHeight;
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            var scissorBox = stack.mallocInt(4);
+            GL11.glGetIntegerv(GL11.GL_SCISSOR_BOX, scissorBox);
+            prevX = scissorBox.get(0);
+            prevY = scissorBox.get(1);
+            prevWidth = scissorBox.get(2);
+            prevHeight = scissorBox.get(3);
+        }
+
+        int scissorX = Math.round(x0);
+        int scissorY = Math.round(context.height() - y1);
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        GL11.glScissor(scissorX, scissorY, Math.round(scissorWidth), Math.round(scissorHeight));
+        return new ScissorState(wasEnabled, prevX, prevY, prevWidth, prevHeight);
+    }
+
+    private void restoreScissor(ScissorState state) {
+        if (state.wasEnabled()) {
+            GL11.glScissor(state.x(), state.y(), state.width(), state.height());
+        } else {
+            GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        }
+    }
+
+    private record ScissorState(boolean wasEnabled, int x, int y, int width, int height) {
     }
 
     public static class Builder {

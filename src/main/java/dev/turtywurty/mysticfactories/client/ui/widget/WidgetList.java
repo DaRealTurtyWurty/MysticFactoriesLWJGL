@@ -138,6 +138,13 @@ public class WidgetList extends Widget {
     }
 
     @Override
+    public void preRender(DrawContext context) {
+        for (Widget child : children) {
+            child.preRender(context);
+        }
+    }
+
+    @Override
     public void render(DrawContext context) {
         for (Widget child : children) {
             child.render(context);
@@ -145,55 +152,76 @@ public class WidgetList extends Widget {
     }
 
     @Override
-    /** Forwards key press events to all children. */
+    public void postRender(DrawContext context) {
+        for (Widget child : children) {
+            child.postRender(context);
+        }
+    }
+
+    /**
+     * Forwards key press events to all children.
+     */
+    @Override
     public void onKeyPress(int keyCode, int scanCode, int modifiers) {
         for (Widget child : children) {
             child.onKeyPress(keyCode, scanCode, modifiers);
         }
     }
 
+    /**
+     * Forwards key release events to all children.
+     */
     @Override
-    /** Forwards key release events to all children. */
     public void onKeyRelease(int keyCode, int scanCode, int modifiers) {
         for (Widget child : children) {
             child.onKeyRelease(keyCode, scanCode, modifiers);
         }
     }
 
+    /**
+     * Forwards mouse move events to all children.
+     */
     @Override
-    /** Forwards mouse move events to all children. */
     public void onMouseMove(double xPos, double yPos) {
         for (Widget child : children) {
             child.onMouseMove(xPos, yPos);
         }
     }
 
+    /**
+     * Forwards scroll events to all children.
+     */
     @Override
-    /** Forwards scroll events to all children. */
     public void onMouseScroll(double xOffset, double yOffset) {
         for (Widget child : children) {
             child.onMouseScroll(xOffset, yOffset);
         }
     }
 
+    /**
+     * Forwards mouse press events to all children.
+     */
     @Override
-    /** Forwards mouse press events to all children. */
     public void onMouseButtonPress(int button, int action, int modifiers) {
         for (Widget child : children) {
             child.onMouseButtonPress(button, action, modifiers);
         }
     }
 
+    /**
+     * Forwards mouse release events to all children.
+     */
     @Override
-    /** Forwards mouse release events to all children. */
     public void onMouseButtonRelease(int button, int action, int modifiers) {
         for (Widget child : children) {
             child.onMouseButtonRelease(button, action, modifiers);
         }
     }
 
+    /**
+     * Forwards update events to all children.
+     */
     @Override
-    /** Forwards update events to all children. */
     public void onUpdate(double deltaTime) {
         for (Widget child : children) {
             child.onUpdate(deltaTime);

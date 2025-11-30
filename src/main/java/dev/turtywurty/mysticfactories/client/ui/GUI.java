@@ -51,9 +51,23 @@ public class GUI implements UIElement, InputListener {
     }
 
     @Override
+    public void preRender(DrawContext context) {
+        for (UIElement widget : List.copyOf(this.widgets)) {
+            widget.preRender(context);
+        }
+    }
+
+    @Override
     public void render(DrawContext context) {
         for (UIElement widget : List.copyOf(this.widgets)) {
             widget.render(context);
+        }
+    }
+
+    @Override
+    public void postRender(DrawContext context) {
+        for (UIElement widget : List.copyOf(this.widgets)) {
+            widget.postRender(context);
         }
     }
 

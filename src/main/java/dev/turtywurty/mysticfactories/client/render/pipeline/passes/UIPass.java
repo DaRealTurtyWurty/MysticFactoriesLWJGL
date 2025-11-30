@@ -29,8 +29,8 @@ public record UIPass(Shader uiShader, UIRenderer uiRenderer, TextRenderer textRe
 
         uiShader.bind();
         uiShader.setUniform("uTexture", 0);
-        float w = context.getWindow().getWidth();
-        float h = context.getWindow().getHeight();
+        float w = context.getWindow().getFramebufferWidth();
+        float h = context.getWindow().getFramebufferHeight();
         var view = new Matrix4f().identity();
         var proj = new Matrix4f().ortho(0, w, h, 0, -1, 1);
         uiShader.setUniform("uView", view);

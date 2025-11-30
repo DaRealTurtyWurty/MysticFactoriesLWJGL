@@ -80,8 +80,10 @@ public class InputManager {
     }
 
     private void dispatchMouseEvents(List<InputListener> activeListeners) {
-        double mouseX = Mouse.getX();
-        double mouseY = Mouse.getY();
+        double scaleX = this.window.getFramebufferWidth() / (double) this.window.getWidth();
+        double scaleY = this.window.getFramebufferHeight() / (double) this.window.getHeight();
+        double mouseX = Mouse.getX() * scaleX;
+        double mouseY = Mouse.getY() * scaleY;
         if (mouseX != this.previousMouseX || mouseY != this.previousMouseY) {
             for (InputListener listener : activeListeners) {
                 listener.onMouseMove(mouseX, mouseY);

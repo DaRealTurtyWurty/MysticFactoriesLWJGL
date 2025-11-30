@@ -12,6 +12,7 @@ import dev.turtywurty.mysticfactories.client.text.Fonts;
 import dev.turtywurty.mysticfactories.client.ui.GUIStack;
 import dev.turtywurty.mysticfactories.client.ui.HUDManager;
 import dev.turtywurty.mysticfactories.client.ui.MainMenuGUI;
+import dev.turtywurty.mysticfactories.client.ui.SettingsGUI;
 import dev.turtywurty.mysticfactories.client.ui.widget.TextLabel;
 import dev.turtywurty.mysticfactories.client.window.Window;
 import dev.turtywurty.mysticfactories.client.world.ClientWorld;
@@ -40,7 +41,6 @@ public class GameClient implements Runnable {
 
     private final Window window;
     private final Thread gameThread;
-    private final Settings settings;
 
     private Camera camera;
     private InputManager inputManager;
@@ -52,8 +52,7 @@ public class GameClient implements Runnable {
     private boolean worldStarted;
 
     public GameClient() {
-        this.settings = Settings.load();
-        this.window = new Window("Mystic Factories", this.settings);
+        this.window = new Window("Mystic Factories");
         this.gameThread = new Thread(this, "client-thread");
         this.worldStarted = false;
     }
@@ -81,7 +80,7 @@ public class GameClient implements Runnable {
         Fonts.init();
         this.gameRenderer = new GameRenderer(this.camera, this.window);
 
-        GUIStack.push(new MainMenuGUI(() -> startGameWorld()));
+        GUIStack.push(new MainMenuGUI(this::startGameWorld, this::openSettings));
     }
 
     private void loop() {
@@ -93,6 +92,7 @@ public class GameClient implements Runnable {
         int ticks = 0;
 
         while (!this.window.shouldClose()) {
+            long frameStartNanos = System.nanoTime();
             double currentTime = GLFW.glfwGetTime();
             double frameTime = currentTime - lastTime;
             lastTime = currentTime;
@@ -113,8 +113,8 @@ public class GameClient implements Runnable {
             this.window.update();
             frames++;
 
-            if (!this.settings.isVsync()) {
-                sync(currentTime);
+            if (!Settings.getInstance().isVsync()) {
+                sync(frameStartNanos);
             }
 
             if (timer >= 1.0) {
@@ -126,16 +126,26 @@ public class GameClient implements Runnable {
         }
     }
 
-    private void sync(double loopStartTime) {
-        float loopSlot = 1f / this.settings.getFpsCap();
-        double endTime = loopStartTime + loopSlot;
-        while (GLFW.glfwGetTime() < endTime) {
-            try {
-                // noinspection BusyWait
-                Thread.sleep(1);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                break;
+    private void sync(long frameStartTimeNanos) {
+        int fpsCap = Settings.getInstance().getFpsCap();
+        if (fpsCap <= 0) {
+            return;
+        }
+
+        long frameDuration = 1_000_000_000L / fpsCap;
+        long endTime = frameStartTimeNanos + frameDuration;
+        long now;
+        while ((now = System.nanoTime()) < endTime) {
+            long remaining = endTime - now;
+            if (remaining > 2_000_000L) { // more than ~2ms left
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            } else {
+                Thread.onSpinWait();
             }
         }
     }
@@ -187,7 +197,7 @@ public class GameClient implements Runnable {
         }
 
         Fonts.cleanup();
-        this.window.getSettings().save();
+        Settings.getInstance().save();
         this.window.destroy();
     }
 
@@ -249,5 +259,13 @@ public class GameClient implements Runnable {
                         .build());
 
         GUIStack.pop();
+    }
+
+    private void openSettings() {
+        GUIStack.pop();
+        GUIStack.push(new SettingsGUI(() -> {
+            GUIStack.pop();
+            GUIStack.push(new MainMenuGUI(this::startGameWorld, this::openSettings));
+        }));
     }
 }

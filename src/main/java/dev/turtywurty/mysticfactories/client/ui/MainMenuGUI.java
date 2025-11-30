@@ -12,9 +12,11 @@ import java.util.Objects;
  */
 public class MainMenuGUI extends GUI {
     private final Runnable onPlay;
+    private final Runnable onSettings;
 
-    public MainMenuGUI(Runnable onPlay) {
+    public MainMenuGUI(Runnable onPlay, Runnable onSettings) {
         this.onPlay = Objects.requireNonNull(onPlay, "onPlay");
+        this.onSettings = Objects.requireNonNull(onSettings, "onSettings");
     }
 
     @Override
@@ -22,7 +24,7 @@ public class MainMenuGUI extends GUI {
         float buttonWidth = 180f;
         float buttonHeight = 42f;
         float listX = (screenWidth - buttonWidth) * 0.5f;
-        float listY = (screenHeight - (buttonHeight * 2 + 12f)) * 0.5f;
+        float listY = (screenHeight - (buttonHeight * 3 + 24f)) * 0.5f;
 
         var list = WidgetList.vertical()
                 .position(listX, listY)
@@ -32,6 +34,12 @@ public class MainMenuGUI extends GUI {
                         .size(buttonWidth, buttonHeight)
                         .text("Play")
                         .onClick(btn -> this.onPlay.run())
+                        .build())
+                .addChild(Button.builder()
+                        .position(0, 0)
+                        .size(buttonWidth, buttonHeight)
+                        .text("Settings")
+                        .onClick(btn -> this.onSettings.run())
                         .build())
                 .addChild(Button.builder()
                         .position(0, 0)

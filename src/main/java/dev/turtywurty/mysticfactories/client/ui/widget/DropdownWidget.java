@@ -1,6 +1,5 @@
 package dev.turtywurty.mysticfactories.client.ui.widget;
 
-import dev.turtywurty.mysticfactories.client.text.Fonts;
 import dev.turtywurty.mysticfactories.client.ui.DrawContext;
 import org.lwjgl.glfw.GLFW;
 
@@ -25,6 +24,7 @@ public class DropdownWidget<T> extends Widget {
     private final boolean scrollable;
     private final float optionHeight;
     private boolean open;
+    private boolean openedThisFrame;
     private T selected;
     private Widget selectedView;
     private Widget optionsView;
@@ -106,6 +106,13 @@ public class DropdownWidget<T> extends Widget {
     }
 
     @Override
+    public void preRender(DrawContext context) {
+        if (this.selectedView != null) {
+            this.selectedView.preRender(context);
+        }
+    }
+
+    @Override
     public void render(DrawContext context) {
         this.lastScreenHeight = context.height();
         context.drawRect(getX(), getY(), getWidth(), getHeight(), this.backgroundColor);
@@ -115,9 +122,27 @@ public class DropdownWidget<T> extends Widget {
         if (this.selectedView != null) {
             this.selectedView.render(context);
         }
+    }
+
+    @Override
+    public void postRender(DrawContext context) {
+        if (this.selectedView != null) {
+            this.selectedView.postRender(context);
+        }
 
         if (this.open && this.optionsView != null) {
+            float panelX = this.optionsView.getX();
+            float panelY = this.optionsView.getY();
+            float panelWidth = this.optionsView.getWidth();
+            float panelHeight = this.optionsView.getHeight();
+            context.drawRect(panelX, panelY, panelWidth, panelHeight, this.backgroundColor);
+            context.drawRect(panelX, panelY, panelWidth, 1f, this.borderColor);
+            context.drawRect(panelX, panelY + panelHeight - 1f, panelWidth, 1f, this.borderColor);
+            context.drawRect(panelX, panelY, 1f, panelHeight, this.borderColor);
+            context.drawRect(panelX + panelWidth - 1f, panelY, 1f, panelHeight, this.borderColor);
+            this.optionsView.preRender(context);
             this.optionsView.render(context);
+            this.optionsView.postRender(context);
         }
     }
 
@@ -140,22 +165,29 @@ public class DropdownWidget<T> extends Widget {
             return;
 
         if (action == GLFW.GLFW_PRESS) {
-            if (isInside(this.lastMouseX, this.lastMouseY)) {
+            if (containsPoint(this.lastMouseX, this.lastMouseY)) {
                 toggleOpen();
                 if (this.open) {
+                    this.openedThisFrame = true;
                     rebuildOptions();
                 }
             } else if (this.open && this.optionsView != null) {
-                this.optionsView.onMouseButtonPress(button, action, modifiers);
+                if(this.optionsView.containsPoint(lastMouseX, lastMouseY)) {
+                    this.optionsView.onMouseButtonPress(button, action, modifiers);
+                } else {
+                    this.open = false;
+                }
             }
         }
     }
 
     @Override
     public void onMouseButtonRelease(int button, int action, int modifiers) {
-        if (this.open && this.optionsView != null) {
+        if (this.open && !this.openedThisFrame && this.optionsView != null) {
             this.optionsView.onMouseButtonRelease(button, action, modifiers);
         }
+
+        this.openedThisFrame = false;
     }
 
     @Override
@@ -191,6 +223,16 @@ public class DropdownWidget<T> extends Widget {
     }
 
     @Override
+    public void setX(float x) {
+        setPosition(x, getY());
+    }
+
+    @Override
+    public void setY(float y) {
+        setPosition(getX(), y);
+    }
+
+    @Override
     public void setPosition(float x, float y) {
         super.setPosition(x, y);
         if (this.selectedView != null) {
@@ -220,43 +262,72 @@ public class DropdownWidget<T> extends Widget {
 
     private void toggleOpen() {
         this.open = !this.open;
+        if (this.open && this.selectedView != null) {
+            this.selectedView.setPosition(getX(), getY());
+            this.selectedView.setSize(getWidth(), getHeight());
+        }
     }
 
-    private boolean isInside(double mouseX, double mouseY) {
-        return mouseX >= getX() && mouseX <= getX() + getWidth()
-                && mouseY >= getY() && mouseY <= getY() + getHeight();
-    }
-
-    private class OptionEntry extends Widget {
+    private static class OptionEntry extends Widget {
         private final Widget view;
         private final Runnable onClick;
+        private double lastMouseX;
+        private double lastMouseY;
 
         OptionEntry(Widget view, Runnable onClick) {
             super(view.getX(), view.getY(), view.getWidth(), view.getHeight());
             this.view = view;
             this.onClick = onClick;
+            syncView();
+        }
+
+        @Override
+        public void preRender(DrawContext context) {
+            syncView();
+            this.view.preRender(context);
         }
 
         @Override
         public void render(DrawContext context) {
+            syncView();
             this.view.render(context);
         }
 
         @Override
+        public void postRender(DrawContext context) {
+            syncView();
+            this.view.postRender(context);
+        }
+
+        @Override
         public void onMouseButtonRelease(int button, int action, int modifiers) {
-            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && isInside(this.lastMouseX, this.lastMouseY)) {
+            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && containsPoint(this.lastMouseX, this.lastMouseY)) {
                 this.onClick.run();
             }
         }
-
-        private double lastMouseX;
-        private double lastMouseY;
 
         @Override
         public void onMouseMove(double xPos, double yPos) {
             this.lastMouseX = xPos;
             this.lastMouseY = yPos;
             this.view.onMouseMove(xPos, yPos);
+        }
+
+        @Override
+        public void setPosition(float x, float y) {
+            super.setPosition(x, y);
+            syncView();
+        }
+
+        @Override
+        public void setSize(float width, float height) {
+            super.setSize(width, height);
+            syncView();
+        }
+
+        private void syncView() {
+            this.view.setPosition(getX(), getY());
+            this.view.setSize(getWidth(), getHeight());
         }
     }
 
@@ -345,10 +416,6 @@ public class DropdownWidget<T> extends Widget {
             return this;
         }
 
-        private Widget defaultLabel(String text) {
-            return new TextLabel(Fonts.defaultFont(), text, 0, 0, 0xFFFFFFFF);
-        }
-
         public DropdownWidget<T> build() {
             if (this.optionFactory == null) {
                 this.optionFactory = value -> defaultLabel(String.valueOf(value));
@@ -358,7 +425,14 @@ public class DropdownWidget<T> extends Widget {
                 this.selectedFactory = value -> defaultLabel(String.valueOf(value));
             }
 
-            return new DropdownWidget<>(this);
+            DropdownWidget<T> widget = new DropdownWidget<>(this);
+            widget.setPosition(this.x, this.y);
+            widget.setSize(this.width, this.height);
+            return widget;
+        }
+
+        private Widget defaultLabel(String text) {
+            return TextLabel.builder().text(text).build();
         }
     }
 }
