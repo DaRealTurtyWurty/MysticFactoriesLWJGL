@@ -1,26 +1,29 @@
 package dev.turtywurty.mysticfactories.client.ui.widget;
 
 import dev.turtywurty.mysticfactories.client.text.FontAtlas;
+import dev.turtywurty.mysticfactories.client.text.Fonts;
 import dev.turtywurty.mysticfactories.client.ui.DrawContext;
 import dev.turtywurty.mysticfactories.client.util.ColorHelper;
+import dev.turtywurty.mysticfactories.util.Identifier;
+import lombok.Setter;
 
 import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * Clickable button that renders a texture or sub-region of a texture atlas, optionally with text overlay.
+ * Clickable button that renders a subtexture from the GUI atlas, optionally with text overlay.
  */
 public class ImageButton extends AbstractButton {
-    private final int textureId;
-    private final float u0;
-    private final float v0;
-    private final float u1;
-    private final float v1;
+    private final Identifier textureId;
     private final Consumer<ImageButton> onClick;
 
+    @Setter
     private int tintColor = 0xFFFFFFFF;
+    @Setter
     private int hoverTint = 0xFFFFFFFF;
+    @Setter
     private int pressedTint = 0xFFCCCCCC;
+    @Setter
     private int textColor = 0xFFFFFFFF;
     private FontAtlas font;
     private String text;
@@ -28,48 +31,35 @@ public class ImageButton extends AbstractButton {
     private float textBaselineOffset = 0.6f; // relative to height
 
     /**
-     * @param u0/u1/v0/v1 expected in normalized texture coordinates.
+     * Renders a region from the GUI atlas.
      */
-    public ImageButton(float x, float y, float width, float height, int textureId, float u0, float v0, float u1, float v1, Consumer<ImageButton> onClick) {
+    protected ImageButton(float x, float y, float width, float height, Identifier textureId, Consumer<ImageButton> onClick) {
         super(x, y, width, height);
         this.textureId = textureId;
-        this.u0 = u0;
-        this.v0 = v0;
-        this.u1 = u1;
-        this.v1 = v1;
         this.onClick = Objects.requireNonNull(onClick, "onClick");
     }
 
-    public ImageButton setTintColor(int color) {
-        this.tintColor = color;
-        return this;
+    /**
+     * @return builder for a configurable image button.
+     */
+    public static ImageButton.Builder builder() {
+        return new ImageButton.Builder();
     }
 
-    public ImageButton setHoverTint(int color) {
-        this.hoverTint = color;
-        return this;
-    }
-
-    public ImageButton setPressedTint(int color) {
-        this.pressedTint = color;
-        return this;
-    }
-
-    public ImageButton setText(FontAtlas font, String text) {
+    /**
+     * Assigns overlay text to draw atop the image.
+     */
+    public void setText(FontAtlas font, String text) {
         this.font = Objects.requireNonNull(font, "font");
         this.text = Objects.requireNonNull(text, "text");
-        return this;
     }
 
-    public ImageButton setTextColor(int color) {
-        this.textColor = color;
-        return this;
-    }
-
-    public ImageButton setTextPadding(float paddingX, float baselineOffset) {
+    /**
+     * Adjusts text padding from the left and baseline offset relative to height.
+     */
+    public void setTextPadding(float paddingX, float baselineOffset) {
         this.textPaddingX = paddingX;
         this.textBaselineOffset = baselineOffset;
-        return this;
     }
 
     @Override
@@ -79,7 +69,7 @@ public class ImageButton extends AbstractButton {
         float green = ColorHelper.getGreen(tint);
         float blue = ColorHelper.getBlue(tint);
         float alpha = ColorHelper.getAlpha(tint);
-        context.drawRect(getX(), getY(), getWidth(), getHeight(), red, green, blue, alpha, this.u0, this.v0, this.u1, this.v1, this.textureId);
+        context.drawTexture(getX(), getY(), getWidth(), getHeight(), red, green, blue, alpha, this.textureId);
 
         if (this.font != null && this.text != null) {
             float textX = getX() + this.textPaddingX;
@@ -91,5 +81,123 @@ public class ImageButton extends AbstractButton {
     @Override
     protected void onClick() {
         this.onClick.accept(this);
+    }
+
+    public static class Builder {
+        private float x, y, width, height;
+        private Identifier textureId;
+        private Consumer<ImageButton> onClick;
+        private int tintColor = 0xFFFFFFFF;
+        private int hoverTint = 0xFFFFFFFF;
+        private int pressedTint = 0xFFCCCCCC;
+        private int textColor = 0xFFFFFFFF;
+        private FontAtlas font = Fonts.defaultFont();
+        private String text;
+        private float textPaddingX = 6f;
+        private float textBaselineOffset = 0.6f; // relative to height
+
+        /**
+         * Top-left position in screen space.
+         */
+        public Builder position(float x, float y) {
+            this.x = x;
+            this.y = y;
+            return this;
+        }
+
+        /**
+         * Size of the button in pixels.
+         */
+        public Builder size(float width, float height) {
+            this.width = width;
+            this.height = height;
+            return this;
+        }
+
+        /**
+         * Uses a GUI atlas identifier; UVs are derived automatically.
+         */
+        public Builder texture(Identifier textureId) {
+            this.textureId = textureId;
+            return this;
+        }
+
+        /**
+         * Click callback invoked on release within bounds.
+         */
+        public Builder onClick(Consumer<ImageButton> onClick) {
+            this.onClick = onClick;
+            return this;
+        }
+
+        /**
+         * Base tint color applied to the image.
+         */
+        public Builder tintColor(int tintColor) {
+            this.tintColor = tintColor;
+            return this;
+        }
+
+        /**
+         * Tint color when hovered.
+         */
+        public Builder hoverTint(int hoverTint) {
+            this.hoverTint = hoverTint;
+            return this;
+        }
+
+        /**
+         * Tint color when pressed.
+         */
+        public Builder pressedTint(int pressedTint) {
+            this.pressedTint = pressedTint;
+            return this;
+        }
+
+        /**
+         * Text color for the optional overlay label.
+         */
+        public Builder textColor(int textColor) {
+            this.textColor = textColor;
+            return this;
+        }
+
+        /**
+         * Font atlas for the optional overlay label.
+         */
+        public Builder font(FontAtlas font) {
+            this.font = font;
+            return this;
+        }
+
+        /**
+         * Text for the optional overlay label.
+         */
+        public Builder text(String text) {
+            this.text = text;
+            return this;
+        }
+
+        /**
+         * Padding from left and baseline offset for text placement.
+         */
+        public Builder textPadding(float paddingX, float baselineOffset) {
+            this.textPaddingX = paddingX;
+            this.textBaselineOffset = baselineOffset;
+            return this;
+        }
+
+        public ImageButton build() {
+            var button = new ImageButton(x, y, width, height, textureId, onClick);
+            button.setTintColor(tintColor);
+            button.setHoverTint(hoverTint);
+            button.setPressedTint(pressedTint);
+            button.setTextColor(textColor);
+            if (font != null && text != null) {
+                button.setText(font, text);
+            }
+            button.setTextPadding(textPaddingX, textBaselineOffset);
+            return button;
+        }
     }
 }

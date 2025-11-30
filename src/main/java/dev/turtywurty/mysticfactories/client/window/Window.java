@@ -158,6 +158,10 @@ public class Window {
         return resized;
     }
 
+    public static long getCurrentWindowId() {
+        return GLFW.glfwGetCurrentContext();
+    }
+
     public int getWidth() {
         return this.settings.getWindowWidth();
     }

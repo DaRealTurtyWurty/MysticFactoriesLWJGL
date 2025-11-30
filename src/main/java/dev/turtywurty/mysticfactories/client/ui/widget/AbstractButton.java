@@ -64,6 +64,9 @@ public abstract class AbstractButton extends Widget {
         }
     }
 
+    /**
+     * @return true if the provided mouse coordinates are within the button bounds.
+     */
     protected boolean isInside(double mouseX, double mouseY) {
         return mouseX >= getX() && mouseX <= getX() + getWidth() &&
                 mouseY >= getY() && mouseY <= getY() + getHeight();

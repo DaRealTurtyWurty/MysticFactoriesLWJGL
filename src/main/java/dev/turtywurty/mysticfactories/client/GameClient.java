@@ -24,12 +24,16 @@ import dev.turtywurty.mysticfactories.server.ServerWorld;
 import dev.turtywurty.mysticfactories.util.Identifier;
 import dev.turtywurty.mysticfactories.world.ChunkPos;
 import dev.turtywurty.mysticfactories.world.WorldTypeRegistry;
+import dev.turtywurty.mysticfactories.world.entity.Entity;
 import dev.turtywurty.mysticfactories.world.entity.EntityTypeRegistry;
 import dev.turtywurty.mysticfactories.world.tile.TileRegistry;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2d;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
+
+import java.util.Optional;
 
 public class GameClient implements Runnable {
     private static final int TARGET_UPS = 30;
@@ -231,16 +235,18 @@ public class GameClient implements Runnable {
         this.inputManager.addListener(new PlayerInputController(this.clientWorld));
 
         HUDManager.addLastElement(Identifier.of("debug_position"),
-                new TextLabel(Fonts.defaultFont(),
-                        () -> String.format("X: %.2f, Y: %.2f",
-                                this.clientWorld.getLocalPlayer()
-                                        .map(p -> p.getPosition().x)
-                                        .orElse(0.0),
-                                this.clientWorld.getLocalPlayer()
-                                        .map(p -> p.getPosition().y)
-                                        .orElse(0.0)),
-                        8f,
-                        8f));
+                TextLabel.builder()
+                        .textSupplier(() -> {
+                            Optional<Entity> localPlayerOpt = this.clientWorld.getLocalPlayer();
+                            if (localPlayerOpt.isEmpty())
+                                return "X: 0.00, Y: 0.00";
+
+                            Vector2d pos = localPlayerOpt.get().getPosition();
+
+                            return String.format("X: %.2f, Y: %.2f", pos.x, pos.y);
+                        })
+                        .position(8, 8)
+                        .build());
 
         GUIStack.pop();
     }

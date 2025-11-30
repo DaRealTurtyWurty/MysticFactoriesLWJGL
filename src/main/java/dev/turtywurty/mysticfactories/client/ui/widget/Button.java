@@ -1,6 +1,7 @@
 package dev.turtywurty.mysticfactories.client.ui.widget;
 
 import dev.turtywurty.mysticfactories.client.text.FontAtlas;
+import dev.turtywurty.mysticfactories.client.text.Fonts;
 import dev.turtywurty.mysticfactories.client.ui.DrawContext;
 
 import java.util.Objects;
@@ -19,28 +20,47 @@ public class Button extends AbstractButton {
     private int pressedColor = 0xFF232323;
     private int textColor = 0xFFFFFFFF;
 
-    public Button(float x, float y, float width, float height, FontAtlas font, String text, Consumer<Button> onClick) {
+    protected Button(float x, float y, float width, float height, FontAtlas font, String text, Consumer<Button> onClick) {
         super(x, y, width, height);
         this.font = Objects.requireNonNull(font, "font");
         this.text = Objects.requireNonNull(text, "text");
         this.onClick = Objects.requireNonNull(onClick, "onClick");
     }
 
+    /**
+     * @return builder for a configurable button instance.
+     */
+    public static Button.Builder builder() {
+        return new Button.Builder();
+    }
+
+    /**
+     * Sets the base background color.
+     */
     public Button setBackgroundColor(int color) {
         this.backgroundColor = color;
         return this;
     }
 
+    /**
+     * Sets the hover background color.
+     */
     public Button setHoverColor(int color) {
         this.hoverColor = color;
         return this;
     }
 
+    /**
+     * Sets the pressed background color.
+     */
     public Button setPressedColor(int color) {
         this.pressedColor = color;
         return this;
     }
 
+    /**
+     * Sets the text color.
+     */
     public Button setTextColor(int color) {
         this.textColor = color;
         return this;
@@ -60,5 +80,58 @@ public class Button extends AbstractButton {
     @Override
     protected void onClick() {
         this.onClick.accept(this);
+    }
+
+    public static class Builder {
+        private float x, y, width, height;
+        private FontAtlas font = Fonts.defaultFont();
+        private String text;
+        private Consumer<Button> onClick;
+
+        /**
+         * Position of the top-left corner.
+         */
+        public Builder position(float x, float y) {
+            this.x = x;
+            this.y = y;
+            return this;
+        }
+
+        /**
+         * Size of the button in pixels.
+         */
+        public Builder size(float width, float height) {
+            this.width = width;
+            this.height = height;
+            return this;
+        }
+
+        /**
+         * Font used to render the label.
+         */
+        public Builder font(FontAtlas font) {
+            this.font = font;
+            return this;
+        }
+
+        /**
+         * Label text to display.
+         */
+        public Builder text(String text) {
+            this.text = text;
+            return this;
+        }
+
+        /**
+         * Click callback invoked on release within bounds.
+         */
+        public Builder onClick(Consumer<Button> onClick) {
+            this.onClick = onClick;
+            return this;
+        }
+
+        public Button build() {
+            return new Button(x, y, width, height, font, text, onClick);
+        }
     }
 }

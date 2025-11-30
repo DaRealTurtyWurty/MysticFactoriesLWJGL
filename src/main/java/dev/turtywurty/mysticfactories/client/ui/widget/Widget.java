@@ -24,11 +24,23 @@ public abstract class Widget implements UIElement, InputListener {
         this.height = height;
     }
 
+    /**
+     * Sets the widget position in screen space.
+     *
+     * @param x left coordinate in pixels
+     * @param y top coordinate in pixels
+     */
     public void setPosition(float x, float y) {
         this.x = x;
         this.y = y;
     }
 
+    /**
+     * Sets the widget size in pixels.
+     *
+     * @param width  width in pixels
+     * @param height height in pixels
+     */
     public void setSize(float width, float height) {
         this.width = width;
         this.height = height;
