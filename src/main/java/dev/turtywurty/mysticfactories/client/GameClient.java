@@ -10,7 +10,8 @@ import dev.turtywurty.mysticfactories.client.render.world.entity.EntityRendererR
 import dev.turtywurty.mysticfactories.client.settings.Settings;
 import dev.turtywurty.mysticfactories.client.text.Fonts;
 import dev.turtywurty.mysticfactories.client.ui.HUDManager;
-import dev.turtywurty.mysticfactories.client.ui.TextLabel;
+import dev.turtywurty.mysticfactories.client.ui.widget.TextLabel;
+import dev.turtywurty.mysticfactories.client.ui.GUIStack;
 import dev.turtywurty.mysticfactories.client.window.Window;
 import dev.turtywurty.mysticfactories.client.world.ClientWorld;
 import dev.turtywurty.mysticfactories.client.world.LocalWorldConnection;
@@ -26,7 +27,6 @@ import dev.turtywurty.mysticfactories.world.entity.EntityTypeRegistry;
 import dev.turtywurty.mysticfactories.world.tile.TileRegistry;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
-import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
@@ -69,6 +69,7 @@ public class GameClient implements Runnable {
 
         this.camera = new Camera(new Vector2f(0.0f, 0.0f), 200f);
         this.camera.setOrthoBounds(this.window.getWidth(), this.window.getHeight());
+        GUIStack.onResize(this.window.getWidth(), this.window.getHeight());
         this.inputManager = new InputManager(this.camera, this.window);
         Fonts.init();
 
@@ -134,6 +135,7 @@ public class GameClient implements Runnable {
     private void handleWindowResize() {
         if (this.window.hasResized()) {
             this.camera.setOrthoBounds(this.window.getWidth(), this.window.getHeight());
+            GUIStack.onResize(this.window.getWidth(), this.window.getHeight());
             this.window.setResized(false);
         }
     }
@@ -143,11 +145,12 @@ public class GameClient implements Runnable {
     }
 
     private void update(double deltaTime) {
-        if (this.integratedServer != null) {
+        boolean pauseIntegrated = this.integratedServer != null && GUIStack.shouldPauseGame();
+        if (this.integratedServer != null && !pauseIntegrated) {
             this.integratedServer.tick(deltaTime);
         }
 
-        if (this.clientWorld != null) {
+        if (this.clientWorld != null && !pauseIntegrated) {
             this.clientWorld.tick(deltaTime);
         }
     }
@@ -230,7 +233,6 @@ public class GameClient implements Runnable {
                                         .map(p -> p.getPosition().y)
                                         .orElse(0.0)),
                         8f,
-                        8f,
-                        new Vector4f(1f, 1f, 1f, 1f)));
+                        8f));
     }
 }

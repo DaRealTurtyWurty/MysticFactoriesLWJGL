@@ -4,18 +4,12 @@ import dev.turtywurty.mysticfactories.client.shader.Shader;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.*;
 
 /**
  * Uploads text meshes to the GPU and draws them with the shared UI shader.
  */
 public class TextRenderer {
-    private static final Vector4f DEFAULT_COLOR = new Vector4f(1f, 1f, 1f, 1f);
-
     private final Shader shader;
     private final int vao;
     private final int vbo;
@@ -45,7 +39,7 @@ public class TextRenderer {
      * Draws text in screen space. Assumes the UI shader is already bound and the appropriate
      * blend state is configured by the caller.
      */
-    public void draw(FontAtlas font, String text, float x, float y, Matrix4f view, Matrix4f projection, Vector4f color) {
+    public void draw(FontAtlas font, String text, float x, float y, Matrix4f view, Matrix4f projection, float red, float green, float blue, float alpha) {
         if (font == null || text == null || text.isEmpty())
             return;
 
@@ -66,7 +60,7 @@ public class TextRenderer {
         this.shader.setUniform("uProjection", projection);
         this.shader.setUniform("uUseTexture", true);
         this.shader.setUniform("uSampleAlphaOnly", true);
-        this.shader.setUniform("uColor", color == null ? DEFAULT_COLOR : color);
+        this.shader.setUniform("uColor", new Vector4f(red, green, blue, alpha));
         this.shader.setUniform("uUVMin", new Vector2f(0f, 0f));
         this.shader.setUniform("uUVMax", new Vector2f(1f, 1f));
         this.shader.setUniform("uTexture", 0);

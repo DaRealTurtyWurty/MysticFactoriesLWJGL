@@ -7,6 +7,7 @@ import dev.turtywurty.mysticfactories.client.shader.Shader;
 import dev.turtywurty.mysticfactories.client.text.TextRenderer;
 import dev.turtywurty.mysticfactories.client.ui.DrawContext;
 import dev.turtywurty.mysticfactories.client.ui.HUDManager;
+import dev.turtywurty.mysticfactories.client.ui.GUIStack;
 import dev.turtywurty.mysticfactories.client.ui.UIRenderer;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
@@ -38,8 +39,9 @@ public record UIPass(Shader uiShader, UIRenderer uiRenderer, TextRenderer textRe
 
         double mouseX = Mouse.getX();
         double mouseY = Mouse.getY();
-        var drawContext = new DrawContext(uiShader, uiRenderer, this.textRenderer, view, proj, mouseX, mouseY);
+        var drawContext = new DrawContext(uiShader, uiRenderer, this.textRenderer, view, proj, w, h, mouseX, mouseY);
         HUDManager.render(drawContext);
+        GUIStack.render(drawContext);
 
         uiShader.unbind();
         if (blendWasEnabled) {
@@ -58,6 +60,7 @@ public record UIPass(Shader uiShader, UIRenderer uiRenderer, TextRenderer textRe
     @Override
     public void cleanup() {
         HUDManager.cleanup();
+        GUIStack.clear();
         this.uiRenderer.cleanup();
         this.textRenderer.cleanup();
     }
