@@ -17,7 +17,7 @@ public class Cursor extends Widget {
     @Getter
     private int blinkTimer = 0;
     @Getter
-    private int blinkInterval = 30;
+    private int blinkInterval = 60;
 
     protected Cursor(float x, float y, @NotNull FontAtlas font) {
         super(x, y, 2, font.getLineHeight());

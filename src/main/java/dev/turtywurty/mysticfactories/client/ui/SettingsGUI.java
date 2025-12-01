@@ -36,9 +36,6 @@ public class SettingsGUI extends GUI {
         //list.addChild(resolutionRow(panelWidth));
         list.addChild(vsyncRow(panelWidth));
         list.addChild(fpsRow(panelWidth));
-        list.addChild(TextInput.builder()
-                .size(200f, 28f)
-                .build());
 
         list.addChild(Button.builder()
                 .size(120f, 32f)
