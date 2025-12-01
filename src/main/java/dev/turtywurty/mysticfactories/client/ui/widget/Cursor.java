@@ -12,7 +12,7 @@ public class Cursor extends Widget {
     private FontAtlas font;
     @Setter
     @Getter
-    private int color;
+    private int color = 0xFFFFFFFF;
 
     @Getter
     private int blinkTimer = 0;
@@ -20,7 +20,7 @@ public class Cursor extends Widget {
     private int blinkInterval = 30;
 
     protected Cursor(float x, float y, @NotNull FontAtlas font) {
-        super(x, y, 1, font.getLineHeight());
+        super(x, y, 2, font.getLineHeight());
         this.font = font;
     }
 
@@ -35,13 +35,12 @@ public class Cursor extends Widget {
             return;
 
         int color = ColorHelper.blendColors(this.color, 0x00000000, (float) blinkTimer / blinkInterval);
-        context.drawRect(getX()
-                , getY(), getWidth(), getHeight(), color);
+        context.drawRect(getX(), getY(), getWidth(), getHeight(), color);
     }
 
     public void setFont(@NotNull FontAtlas font) {
         this.font = font;
-        setSize(1, font.getLineHeight());
+        setSize(getWidth(), font.getLineHeight());
     }
 
     public void setBlinkInterval(int blinkInterval) {
