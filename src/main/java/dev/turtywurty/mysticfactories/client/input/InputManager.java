@@ -9,11 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InputManager {
+    private static final double KEY_REPEAT_DELAY = 0.35;
+    private static final double KEY_REPEAT_INTERVAL = 0.05;
     private final Camera camera;
     private final Window window;
     private final List<InputListener> listeners = new ArrayList<>();
     private final boolean[] previousKeys = new boolean[GLFW.GLFW_KEY_LAST];
     private final boolean[] previousMouseButtons = new boolean[GLFW.GLFW_MOUSE_BUTTON_LAST];
+    private final double[] keyRepeatTimers = new double[GLFW.GLFW_KEY_LAST];
     private final List<Integer> charQueue = new ArrayList<>();
     private double previousMouseX;
     private double previousMouseY;
@@ -33,7 +36,7 @@ public class InputManager {
         }
 
         List<InputListener> activeListeners = getActiveListeners();
-        dispatchKeyEvents(activeListeners);
+        dispatchKeyEvents(activeListeners, deltaTime);
         dispatchMouseEvents(activeListeners);
         dispatchCharEvents(activeListeners);
 
@@ -67,7 +70,7 @@ public class InputManager {
         return this.listeners;
     }
 
-    private void dispatchKeyEvents(List<InputListener> activeListeners) {
+    private void dispatchKeyEvents(List<InputListener> activeListeners, double deltaTime) {
         for (int key = 0; key < GLFW.GLFW_KEY_LAST; key++) {
             boolean isDown = Keyboard.isKeyDown(key);
             boolean wasDown = this.previousKeys[key];
@@ -76,10 +79,24 @@ public class InputManager {
                 for (InputListener listener : activeListeners) {
                     listener.onKeyPress(key, 0, 0);
                 }
+                this.keyRepeatTimers[key] = KEY_REPEAT_DELAY;
+            } else if (isDown) {
+                double timer = this.keyRepeatTimers[key] - deltaTime;
+                while (timer <= 0.0f) {
+                    for (InputListener listener : activeListeners) {
+                        listener.onKeyPress(key, 0, 0);
+                    }
+                    timer += KEY_REPEAT_INTERVAL;
+                }
+
+                this.keyRepeatTimers[key] = timer;
             } else if (!isDown && wasDown) {
                 for (InputListener listener : activeListeners) {
                     listener.onKeyRelease(key, 0, 0);
                 }
+                this.keyRepeatTimers[key] = 0.0;
+            } else {
+                this.keyRepeatTimers[key] = 0.0;
             }
 
             this.previousKeys[key] = isDown;
