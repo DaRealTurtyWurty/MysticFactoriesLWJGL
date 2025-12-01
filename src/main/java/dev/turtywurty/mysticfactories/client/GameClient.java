@@ -77,6 +77,7 @@ public class GameClient implements Runnable {
         this.camera.setOrthoBounds(this.window.getWidth(), this.window.getHeight());
         GUIStack.onResize(this.window.getWidth(), this.window.getHeight());
         this.inputManager = new InputManager(this.camera, this.window);
+        this.window.setInputManager(this.inputManager);
         Fonts.init();
         this.gameRenderer = new GameRenderer(this.camera, this.window);
 

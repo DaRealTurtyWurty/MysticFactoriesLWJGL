@@ -203,6 +203,18 @@ public class WidgetList extends Widget {
         }
     }
 
+    @Override
+    public void onCharInput(int codepoint) {
+        if (!isVisible() || isDisabled())
+            return;
+
+        for (Widget child : children) {
+            if (child.isVisible() && !child.isDisabled()) {
+                child.onCharInput(codepoint);
+            }
+        }
+    }
+
     /**
      * Forwards mouse move events to all children.
      */

@@ -114,10 +114,17 @@ public class GUI implements UIElement, InputListener {
     }
 
     @Override
+    public final void onCharInput(int codepoint) {
+        handleCharInput(codepoint);
+        dispatchToWidgets(listener -> listener.onCharInput(codepoint));
+    }
+
+    @Override
     public final void onMouseMove(double xPos, double yPos) {
         handleMouseMove(xPos, yPos);
         dispatchToWidgets(listener -> listener.onMouseMove(xPos, yPos));
     }
+
 
     @Override
     public final void onMouseScroll(double xOffset, double yOffset) {
@@ -147,6 +154,9 @@ public class GUI implements UIElement, InputListener {
     }
 
     protected void handleKeyRelease(int keyCode, int scanCode, int modifiers) {
+    }
+
+    protected void handleCharInput(int codepoint) {
     }
 
     protected void handleMouseMove(double xPos, double yPos) {

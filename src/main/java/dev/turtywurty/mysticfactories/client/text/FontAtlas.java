@@ -159,8 +159,12 @@ public class FontAtlas {
 
     public Glyph getGlyph(char c) {
         int index = c - FIRST_CHAR;
-        if (index < 0 || index >= CHAR_COUNT)
-            throw new IllegalArgumentException("Character out of bounds: " + c);
+        if (index < 0 || index >= CHAR_COUNT) {
+            if (c == '?')
+                return null;
+
+            return getGlyph('?');
+        }
 
         return glyphs[index];
     }

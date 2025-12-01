@@ -24,6 +24,7 @@ public class DrawContext {
     private final float height;
     private final double mouseX;
     private final double mouseY;
+    private final ScissorStack scissorStack;
 
     /**
      * Creates a new draw context for the current UI frame.
@@ -48,6 +49,15 @@ public class DrawContext {
         this.height = height;
         this.mouseX = mouseX;
         this.mouseY = mouseY;
+        this.scissorStack = new ScissorStack(this);
+    }
+
+    public ScissorStack getScissorStack() {
+        return this.scissorStack;
+    }
+
+    public UIRenderer getBatch() {
+        return this.renderer;
     }
 
     /**

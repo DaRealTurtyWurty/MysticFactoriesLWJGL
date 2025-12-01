@@ -7,6 +7,9 @@ public interface InputListener {
     default void onKeyRelease(int keyCode, int scanCode, int modifiers) {
     }
 
+    default void onCharInput(int codepoint) {
+    }
+
     default void onMouseMove(double xPos, double yPos) {
     }
 

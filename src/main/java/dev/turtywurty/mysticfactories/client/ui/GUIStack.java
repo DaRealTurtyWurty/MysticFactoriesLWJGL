@@ -94,6 +94,14 @@ public final class GUIStack implements InputListener {
     }
 
     @Override
+    public void onCharInput(int codepoint) {
+        GUI top = peek();
+        if (top != null) {
+            top.onCharInput(codepoint);
+        }
+    }
+
+    @Override
     public void onMouseMove(double xPos, double yPos) {
         GUI top = peek();
         if (top != null) {

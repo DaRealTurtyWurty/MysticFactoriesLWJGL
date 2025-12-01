@@ -1,5 +1,6 @@
 package dev.turtywurty.mysticfactories.client.window;
 
+import dev.turtywurty.mysticfactories.client.input.InputManager;
 import dev.turtywurty.mysticfactories.client.input.Keyboard;
 import dev.turtywurty.mysticfactories.client.input.Mouse;
 import dev.turtywurty.mysticfactories.client.settings.ResolutionPreset;
@@ -7,6 +8,7 @@ import dev.turtywurty.mysticfactories.client.settings.Settings;
 import lombok.Getter;
 import lombok.Setter;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWCharCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
@@ -24,11 +26,14 @@ public class Window {
     private int framebufferWidth;
     private int framebufferHeight;
 
+    private InputManager inputManager;
+
     private final Keyboard keyboardCallback;
     private final Mouse.MouseButtonCallback mouseButtonCallback;
     private final Mouse.CursorPosCallback cursorPosCallback;
     private final Mouse.ScrollCallback scrollCallback;
     private final GLFWWindowSizeCallback windowSizeCallback;
+    private GLFWCharCallback charCallback;
 
     public Window(String title) {
         this.title = title;
@@ -89,7 +94,17 @@ public class Window {
         if (this.id == MemoryUtil.NULL)
             throw new RuntimeException("Failed to create GLFW window!");
 
+        this.charCallback = new GLFWCharCallback() {
+            @Override
+            public void invoke(long window, int codepoint) {
+                if (Window.this.inputManager != null) {
+                    Window.this.inputManager.onCharInput(codepoint);
+                }
+            }
+        };
+
         GLFW.glfwSetKeyCallback(this.id, this.keyboardCallback);
+        GLFW.glfwSetCharCallback(this.id, this.charCallback);
         GLFW.glfwSetMouseButtonCallback(this.id, this.mouseButtonCallback);
         GLFW.glfwSetCursorPosCallback(this.id, this.cursorPosCallback);
         GLFW.glfwSetScrollCallback(this.id, this.scrollCallback);
@@ -105,6 +120,10 @@ public class Window {
         GLFW.glfwShowWindow(this.id);
     }
 
+    public void setInputManager(InputManager inputManager) {
+        this.inputManager = inputManager;
+    }
+
     private GLFWVidMode getVideoMode() {
         long monitor = GLFW.glfwGetPrimaryMonitor();
         GLFWVidMode vidMode = GLFW.glfwGetVideoMode(monitor);
@@ -113,6 +132,7 @@ public class Window {
 
         return vidMode;
     }
+
 
     public void setVsync(boolean vsync) {
         Settings.getInstance().setVsync(vsync);
@@ -147,6 +167,7 @@ public class Window {
         this.cursorPosCallback.free();
         this.scrollCallback.free();
         this.windowSizeCallback.free();
+        this.charCallback.free();
 
         GLFW.glfwDestroyWindow(this.id);
         GLFW.glfwTerminate();

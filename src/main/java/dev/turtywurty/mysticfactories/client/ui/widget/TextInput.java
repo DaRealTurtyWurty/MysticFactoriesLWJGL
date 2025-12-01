@@ -17,6 +17,7 @@ public class TextInput extends Widget {
     private FontAtlas font = Fonts.defaultFont();
 
     private int cursorPosition = 0;
+    private int offset = 0;
     private final SelectionRange selectionRange = new SelectionRange(0, 0);
     private final Cursor cursor = new Cursor(0, 0, this.font);
 
@@ -49,14 +50,19 @@ public class TextInput extends Widget {
 
     @Override
     public void render(DrawContext context) {
+        context.getScissorStack().push(getX() + this.borderWidth, getY() + this.borderWidth,
+                getWidth() - this.borderWidth * 2, getHeight() - this.borderWidth * 2);
+
         if (this.selectionRange.getStart() != this.selectionRange.getEnd()) {
-            float selXStart = getX() + 4 + this.font.measureTextWidth(this.text.substring(0, this.selectionRange.getStart()));
-            float selXEnd = getX() + 4 + this.font.measureTextWidth(this.text.substring(0, this.selectionRange.getEnd()));
+            float selXStart = getX() + 4 - this.font.measureTextWidth(this.text.substring(0, this.offset))
+                    + this.font.measureTextWidth(this.text.substring(this.offset, this.selectionRange.getStart()));
+            float selXEnd = getX() + 4 - this.font.measureTextWidth(this.text.substring(0, this.offset))
+                    + this.font.measureTextWidth(this.text.substring(this.offset, this.selectionRange.getEnd()));
             float selY = getY() + (getHeight() - this.font.getLineHeight()) / 2f;
             context.drawRect(selXStart, selY, selXEnd - selXStart, this.font.getLineHeight(), this.selectionColor);
         }
 
-        float x = getX() + 4;
+        float x = getX() + 4 - this.font.measureTextWidth(this.text.substring(0, this.offset));
         float y = getY() + (getHeight() - this.font.getLineHeight()) / 2f;
 
         String displayText = this.text.isEmpty() ? this.placeholder : this.text;
@@ -67,6 +73,8 @@ public class TextInput extends Widget {
         if (this.focused) {
             this.cursor.render(context);
         }
+
+        context.getScissorStack().pop();
     }
 
     public void setMaxLength(int maxLength) {
@@ -85,8 +93,9 @@ public class TextInput extends Widget {
         }
 
         this.text = text;
-        updateCursorPosition();
+        this.offset = 0;
         this.cursorPosition = this.text.length();
+        updateCursorPosition();
     }
 
     public void setFocused(boolean focused) {
@@ -110,11 +119,32 @@ public class TextInput extends Widget {
     }
 
     private void updateCursorPosition() {
-        float x = getX() + 4 + this.font.measureTextWidth(this.text);
+        float textWidth = getWidth() - this.borderWidth * 2 - 8;
+
+        if (this.cursorPosition < this.offset) {
+            this.offset = this.cursorPosition;
+        }
+
+        while (this.font.measureTextWidth(this.text.substring(this.offset, this.cursorPosition)) > textWidth) {
+            this.offset++;
+        }
+
+        // Try to scroll left to fill empty space
+        int newOffset = this.offset;
+        while (newOffset > 0) {
+            if (this.font.measureTextWidth(this.text.substring(newOffset - 1)) <= textWidth) {
+                newOffset--;
+            } else {
+                break;
+            }
+        }
+        this.offset = newOffset;
+
+        float x = getX() + 4 + this.font.measureTextWidth(this.text.substring(this.offset, this.cursorPosition));
         float y = getY() + (getHeight() - this.font.getLineHeight()) / 2f;
         this.cursor.setPosition(x, y);
 
-        this.cursor.setVisible(this.focused && !this.text.isEmpty());
+        this.cursor.setVisible(this.focused);
     }
 
     @Override
@@ -154,8 +184,6 @@ public class TextInput extends Widget {
         } else if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
             this.focused = false;
             this.cursor.setVisible(false);
-        } else {
-            onCharInput((char) keyCode);
         }
     }
 
@@ -165,7 +193,8 @@ public class TextInput extends Widget {
         this.lastMouseY = (float) yPos;
 
         if (containsPoint(this.lastMouseX, this.lastMouseY)) {
-            int relativeX = (int) (this.lastMouseX - getX() - 4);
+            int relativeX = (int) (this.lastMouseX - getX() - 4
+                    + this.font.measureTextWidth(this.text.substring(0, this.offset)));
             int pos = 0;
             float accumulatedWidth = 0f;
             for (int i = 0; i < this.text.length(); i++) {
@@ -189,7 +218,8 @@ public class TextInput extends Widget {
             return;
 
         if (containsPoint(this.lastMouseX, this.lastMouseY)) {
-            int relativeX = (int) (this.lastMouseX - getX() - 4);
+            int relativeX = (int) (this.lastMouseX - getX() - 4
+                    + this.font.measureTextWidth(this.text.substring(0, this.offset)));
             int pos = 0;
             float accumulatedWidth = 0f;
             for (int i = 0; i < this.text.length(); i++) {
@@ -220,17 +250,23 @@ public class TextInput extends Widget {
         setFocused(containsPoint(this.lastMouseX, this.lastMouseY));
     }
 
-    protected void onCharInput(char character) {
+    @Override
+    public void onCharInput(int codepoint) {
         if (!this.focused)
             return;
 
         if (this.text.length() >= this.maxLength)
             return;
 
+        char character = (char) codepoint;
+        if (Character.isISOControl(character))
+            return;
+
         this.text = this.text.substring(0, this.cursorPosition) + character + this.text.substring(this.cursorPosition);
         this.cursorPosition++;
         updateCursorPosition();
     }
+
 
     @Setter
     @Getter

@@ -14,12 +14,17 @@ public class InputManager {
     private final List<InputListener> listeners = new ArrayList<>();
     private final boolean[] previousKeys = new boolean[GLFW.GLFW_KEY_LAST];
     private final boolean[] previousMouseButtons = new boolean[GLFW.GLFW_MOUSE_BUTTON_LAST];
+    private final List<Integer> charQueue = new ArrayList<>();
     private double previousMouseX;
     private double previousMouseY;
 
     public InputManager(Camera camera, Window window) {
         this.camera = camera;
         this.window = window;
+    }
+
+    public void onCharInput(int codepoint) {
+        this.charQueue.add(codepoint);
     }
 
     public void poll(double deltaTime) {
@@ -30,6 +35,7 @@ public class InputManager {
         List<InputListener> activeListeners = getActiveListeners();
         dispatchKeyEvents(activeListeners);
         dispatchMouseEvents(activeListeners);
+        dispatchCharEvents(activeListeners);
 
         if (Mouse.isScrollMoved()) {
             if (GUIStack.isEmpty()) {
@@ -47,6 +53,7 @@ public class InputManager {
     public void addListener(InputListener listener) {
         this.listeners.add(listener);
     }
+
 
     public void removeListener(InputListener listener) {
         this.listeners.remove(listener);
@@ -117,5 +124,15 @@ public class InputManager {
 
         this.previousMouseX = mouseX;
         this.previousMouseY = mouseY;
+    }
+
+    private void dispatchCharEvents(List<InputListener> activeListeners) {
+        for (int codepoint : this.charQueue) {
+            for (InputListener listener : activeListeners) {
+                listener.onCharInput(codepoint);
+            }
+        }
+
+        this.charQueue.clear();
     }
 }
