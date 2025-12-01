@@ -4,7 +4,6 @@ import dev.turtywurty.mysticfactories.client.text.FontAtlas;
 import dev.turtywurty.mysticfactories.client.text.Fonts;
 import dev.turtywurty.mysticfactories.client.ui.DrawContext;
 import lombok.Getter;
-import lombok.Setter;
 import org.lwjgl.glfw.GLFW;
 
 public class TextInput extends Widget {
@@ -31,6 +30,7 @@ public class TextInput extends Widget {
 
     private float lastMouseX = 0;
     private float lastMouseY = 0;
+    private boolean selecting = false;
 
     protected TextInput(float x, float y, float width, float height) {
         super(x, y, width, height);
@@ -192,7 +192,7 @@ public class TextInput extends Widget {
         this.lastMouseX = (float) xPos;
         this.lastMouseY = (float) yPos;
 
-        if (containsPoint(this.lastMouseX, this.lastMouseY)) {
+        if (this.selecting && containsPoint(this.lastMouseX, this.lastMouseY)) {
             int relativeX = (int) (this.lastMouseX - getX() - 4
                     + this.font.measureTextWidth(this.text.substring(0, this.offset)));
             int pos = 0;
@@ -208,7 +208,7 @@ public class TextInput extends Widget {
                 pos = i + 1;
             }
 
-            this.selectionRange.setEnd(pos);
+            this.selectionRange.extend(pos);
         }
     }
 
@@ -236,9 +236,8 @@ public class TextInput extends Widget {
             this.cursorPosition = pos;
             updateCursorPosition();
             setFocused(true);
-
-            this.selectionRange.setStart(pos);
-            this.selectionRange.setEnd(pos);
+            this.selecting = true;
+            this.selectionRange.begin(pos);
         }
     }
 
@@ -248,6 +247,7 @@ public class TextInput extends Widget {
             return;
 
         setFocused(containsPoint(this.lastMouseX, this.lastMouseY));
+        this.selecting = false;
     }
 
     @Override
@@ -268,23 +268,31 @@ public class TextInput extends Widget {
     }
 
 
-    @Setter
     @Getter
     public static class SelectionRange {
         private int start;
         private int end;
+        private int anchor;
 
         public SelectionRange(int start, int end) {
             this.start = start;
             this.end = end;
+            this.anchor = start;
         }
 
-        public void setEnd(int end) {
-            if (end < this.start) {
-                this.end = this.start;
-                this.start = end;
+        public void begin(int position) {
+            this.anchor = position;
+            this.start = position;
+            this.end = position;
+        }
+
+        public void extend(int position) {
+            if (position < this.anchor) {
+                this.start = position;
+                this.end = this.anchor;
             } else {
-                this.end = end;
+                this.start = this.anchor;
+                this.end = position;
             }
         }
     }
