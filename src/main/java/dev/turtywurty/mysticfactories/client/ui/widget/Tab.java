@@ -1,11 +1,14 @@
 package dev.turtywurty.mysticfactories.client.ui.widget;
 
+import lombok.Getter;
+
 import java.util.Objects;
 
 /**
  * Represents a single tab inside a {@link TabPane}. Holds the tab title and the content widget that
  * is rendered when the tab is selected.
  */
+@Getter
 public class Tab {
     private String title;
     private Widget content;
@@ -16,25 +19,11 @@ public class Tab {
     }
 
     /**
-     * @return the label shown in the tab strip.
-     */
-    public String getTitle() {
-        return this.title;
-    }
-
-    /**
      * Sets the label for this tab.
      */
     public Tab setTitle(String title) {
         this.title = Objects.requireNonNullElse(title, "");
         return this;
-    }
-
-    /**
-     * @return widget displayed when this tab is active.
-     */
-    public Widget getContent() {
-        return this.content;
     }
 
     /**
