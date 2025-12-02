@@ -3,8 +3,12 @@ package dev.turtywurty.mysticfactories.client.ui.widget;
 import dev.turtywurty.mysticfactories.client.text.FontAtlas;
 import dev.turtywurty.mysticfactories.client.text.Fonts;
 import dev.turtywurty.mysticfactories.client.ui.DrawContext;
+import dev.turtywurty.mysticfactories.client.util.ClipboardUtils;
 import lombok.Getter;
 import org.lwjgl.glfw.GLFW;
+
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
 
 public class TextInput extends Widget {
     @Getter
@@ -53,22 +57,20 @@ public class TextInput extends Widget {
         context.getScissorStack().push(getX() + this.borderWidth, getY() + this.borderWidth,
                 getWidth() - this.borderWidth * 2, getHeight() - this.borderWidth * 2);
 
+        float baseX = getX() + 4 - this.font.measureTextWidth(this.text.substring(0, this.offset));
+        float baseY = getY() + (getHeight() - this.font.getLineHeight()) / 2f;
         if (this.selectionRange.getStart() != this.selectionRange.getEnd()) {
-            float selXStart = getX() + 4 - this.font.measureTextWidth(this.text.substring(0, this.offset))
-                    + this.font.measureTextWidth(this.text.substring(this.offset, this.selectionRange.getStart()));
-            float selXEnd = getX() + 4 - this.font.measureTextWidth(this.text.substring(0, this.offset))
-                    + this.font.measureTextWidth(this.text.substring(this.offset, this.selectionRange.getEnd()));
-            float selY = getY() + (getHeight() - this.font.getLineHeight()) / 2f;
-            context.drawRect(selXStart, selY, selXEnd - selXStart, this.font.getLineHeight(), this.selectionColor);
+            int selectionStart = Math.max(0, Math.min(this.selectionRange.getStart(), this.text.length()));
+            int selectionEnd = Math.max(0, Math.min(this.selectionRange.getEnd(), this.text.length()));
+            float selXStart = baseX + this.font.measureTextWidth(this.text.substring(0, selectionStart));
+            float selXEnd = baseX + this.font.measureTextWidth(this.text.substring(0, selectionEnd));
+            context.drawRect(selXStart, baseY, selXEnd - selXStart, this.font.getLineHeight(), this.selectionColor);
         }
-
-        float x = getX() + 4 - this.font.measureTextWidth(this.text.substring(0, this.offset));
-        float y = getY() + (getHeight() - this.font.getLineHeight()) / 2f;
 
         String displayText = this.text.isEmpty() ? this.placeholder : this.text;
         int color = this.text.isEmpty() ? this.placeholderColor : this.textColor;
 
-        context.drawText(this.font, displayText, x, y, color);
+        context.drawText(this.font, displayText, baseX, baseY, color);
 
         if (this.focused) {
             this.cursor.render(context);
@@ -153,6 +155,9 @@ public class TextInput extends Widget {
             return;
 
         if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
+            if (deleteSelectedText())
+                return;
+
             if (this.text.isEmpty() || this.cursorPosition == 0)
                 return;
 
@@ -160,6 +165,9 @@ public class TextInput extends Widget {
             this.cursorPosition--;
             updateCursorPosition();
         } else if (keyCode == GLFW.GLFW_KEY_DELETE) {
+            if (deleteSelectedText())
+                return;
+
             if (this.text.isEmpty() || this.cursorPosition >= this.text.length())
                 return;
 
@@ -184,7 +192,53 @@ public class TextInput extends Widget {
         } else if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
             this.focused = false;
             this.cursor.setVisible(false);
+        } else if (keyCode == GLFW.GLFW_KEY_A && isCtrlDown(modifiers)) {
+            this.selectionRange.begin(0);
+            this.selectionRange.extend(this.text.length());
+            this.cursorPosition = this.text.length();
+            updateCursorPosition();
+        } else if (keyCode == GLFW.GLFW_KEY_C && isCtrlDown(modifiers)) {
+            if (this.selectionRange.getStart() != this.selectionRange.getEnd()) {
+                String selectedText = this.text.substring(this.selectionRange.getStart(), this.selectionRange.getEnd());
+                ClipboardUtils.copyStringToClipboard(selectedText);
+            }
+        } else if (keyCode == GLFW.GLFW_KEY_V && isCtrlDown(modifiers)) {
+            String clipboardText = null;
+            try {
+                clipboardText = ClipboardUtils.copyStringFromClipboard();
+            } catch (UnsupportedFlavorException | IOException exception) {
+                System.err.printf("Failed to get clipboard contents: %s%n", exception.getMessage());
+                exception.printStackTrace();
+            }
+
+            if (clipboardText != null && !clipboardText.isEmpty()) {
+                int availableSpace = this.maxLength - this.text.length();
+                String textToInsert = clipboardText.length() > availableSpace ?
+                        clipboardText.substring(0, availableSpace) : clipboardText;
+
+                this.text = this.text.substring(0, this.cursorPosition) + textToInsert + this.text.substring(this.cursorPosition);
+                this.cursorPosition += textToInsert.length();
+                updateCursorPosition();
+            }
         }
+    }
+
+    private boolean deleteSelectedText() {
+        if (this.selectionRange.getStart() != this.selectionRange.getEnd()) {
+            int selectionStart = Math.max(0, Math.min(this.selectionRange.getStart(), this.text.length()));
+            int selectionEnd = Math.max(0, Math.min(this.selectionRange.getEnd(), this.text.length()));
+            this.text = this.text.substring(0, selectionStart) + this.text.substring(selectionEnd);
+            this.cursorPosition = selectionStart;
+            this.selectionRange.begin(selectionStart);
+            updateCursorPosition();
+            return true;
+        }
+        
+        return false;
+    }
+
+    private boolean isCtrlDown(int modifiers) {
+        return (modifiers & GLFW.GLFW_MOD_CONTROL) != 0;
     }
 
     @Override

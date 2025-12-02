@@ -45,6 +45,7 @@ public class InputManager {
                 camera.processScroll((float) Mouse.getScrollY());
                 camera.setOrthoBounds(this.window.getWidth(), this.window.getHeight());
             }
+
             Mouse.resetScrollMoved();
         }
 
@@ -63,9 +64,8 @@ public class InputManager {
     }
 
     private List<InputListener> getActiveListeners() {
-        if (!GUIStack.isEmpty()) {
+        if (!GUIStack.isEmpty())
             return List.of(GUIStack.instance());
-        }
 
         return this.listeners;
     }
@@ -74,26 +74,31 @@ public class InputManager {
         for (int key = 0; key < GLFW.GLFW_KEY_LAST; key++) {
             boolean isDown = Keyboard.isKeyDown(key);
             boolean wasDown = this.previousKeys[key];
+            int scanCode = Keyboard.getLastScancode(key);
+            int modifiers = Keyboard.getLastModifiers(key);
 
             if (isDown && !wasDown) {
                 for (InputListener listener : activeListeners) {
-                    listener.onKeyPress(key, 0, 0);
+                    listener.onKeyPress(key, scanCode, modifiers);
                 }
+
                 this.keyRepeatTimers[key] = KEY_REPEAT_DELAY;
             } else if (isDown) {
                 double timer = this.keyRepeatTimers[key] - deltaTime;
                 while (timer <= 0.0f) {
                     for (InputListener listener : activeListeners) {
-                        listener.onKeyPress(key, 0, 0);
+                        listener.onKeyPress(key, scanCode, modifiers);
                     }
+
                     timer += KEY_REPEAT_INTERVAL;
                 }
 
                 this.keyRepeatTimers[key] = timer;
-            } else if (!isDown && wasDown) {
+            } else if (wasDown) {
                 for (InputListener listener : activeListeners) {
-                    listener.onKeyRelease(key, 0, 0);
+                    listener.onKeyRelease(key, scanCode, modifiers);
                 }
+
                 this.keyRepeatTimers[key] = 0.0;
             } else {
                 this.keyRepeatTimers[key] = 0.0;
