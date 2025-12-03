@@ -28,6 +28,7 @@ public class BasicEntityRenderer<T extends Entity> implements EntityRenderer<T> 
         var pos = entity.getPosition();
         modelMatrix.identity()
                 .translation((float) pos.x, (float) pos.y, 0.0f)
+                // TODO: Derive tileSize from the world
                 .scale(this.tileSize, this.tileSize, 1.0f);
 
         context.shader().setUniform("uUseTexture", true);

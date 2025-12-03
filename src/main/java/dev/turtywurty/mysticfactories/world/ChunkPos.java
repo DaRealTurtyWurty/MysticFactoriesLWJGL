@@ -4,7 +4,7 @@ import dev.turtywurty.mysticfactories.world.tile.TilePos;
 import org.joml.Vector2i;
 
 public class ChunkPos extends Vector2i {
-    public static final int SIZE = 16;
+    public static final int SIZE = 32;
 
     public ChunkPos(int x, int y) {
         super(x, y);

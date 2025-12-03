@@ -35,7 +35,7 @@ public class TilePos extends Vector2i {
     }
 
     public ChunkPos toChunkPos() {
-        return new ChunkPos(this.x >> 4, this.y >> 4);
+        return new ChunkPos(Math.floorDiv(this.x, ChunkPos.SIZE), Math.floorDiv(this.y, ChunkPos.SIZE));
     }
 
     public long toLong() {
