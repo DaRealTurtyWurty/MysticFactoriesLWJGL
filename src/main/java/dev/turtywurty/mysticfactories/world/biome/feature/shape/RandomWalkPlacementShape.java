@@ -15,6 +15,7 @@ public class RandomWalkPlacementShape implements PlacementShape {
 
     @Override
     public List<TilePos> getPositions(World world, Random random, int chunkX, int chunkY, int attempts) {
-
+        // TODO: Implement Random Walk algorithm to generate positions
+        throw new UnsupportedOperationException("Random Walk not yet implemented");
     }
 }

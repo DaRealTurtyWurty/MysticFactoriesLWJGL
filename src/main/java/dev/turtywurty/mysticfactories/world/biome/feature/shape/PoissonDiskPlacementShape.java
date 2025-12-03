@@ -9,6 +9,7 @@ import java.util.Random;
 public class PoissonDiskPlacementShape implements PlacementShape {
     @Override
     public List<TilePos> getPositions(World world, Random random, int chunkX, int chunkY, int attempts) {
-
+        // TODO: Implement Poisson Disk Sampling algorithm to generate positions
+        throw new UnsupportedOperationException("Poisson Disk Sampling not yet implemented");
     }
 }

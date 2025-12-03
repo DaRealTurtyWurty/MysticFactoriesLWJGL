@@ -2,6 +2,7 @@ package dev.turtywurty.mysticfactories.world.biome.feature.shape;
 
 import dev.turtywurty.mysticfactories.world.ChunkPos;
 import dev.turtywurty.mysticfactories.world.World;
+import dev.turtywurty.mysticfactories.world.biome.IntProvider;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
 
 import java.util.ArrayList;

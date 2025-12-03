@@ -4,6 +4,7 @@ import dev.turtywurty.mysticfactories.world.ChunkPos;
 import dev.turtywurty.mysticfactories.world.World;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -16,7 +17,7 @@ public class GridAlignedPlacementShape implements PlacementShape {
 
     @Override
     public List<TilePos> getPositions(World world, Random random, int chunkX, int chunkY, int attempts) {
-        List<TilePos> positions = new java.util.ArrayList<>();
+        List<TilePos> positions = new ArrayList<>();
         int chunkStartX = chunkX * ChunkPos.SIZE;
         int chunkStartY = chunkY * ChunkPos.SIZE;
 
