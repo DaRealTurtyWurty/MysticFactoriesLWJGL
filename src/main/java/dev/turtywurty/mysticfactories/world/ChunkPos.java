@@ -5,6 +5,7 @@ import org.joml.Vector2i;
 
 public class ChunkPos extends Vector2i {
     public static final int SIZE = 32;
+    public static final int HALF_SIZE = SIZE / 2;
 
     public ChunkPos(int x, int y) {
         super(x, y);
