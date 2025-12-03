@@ -325,8 +325,7 @@ public class TabPane extends Widget {
         float cursorX = getX();
         float availableWidth = getWidth();
 
-        for (int i = 0; i < this.tabs.size(); i++) {
-            Tab tab = this.tabs.get(i);
+        for (Tab tab : this.tabs) {
             float textWidth = this.font.measureTextWidth(tab.getTitle());
             float desiredWidth = Math.max(this.minTabWidth, textWidth + this.tabHorizontalPadding * 2f);
             float remaining = availableWidth - (cursorX - getX());
