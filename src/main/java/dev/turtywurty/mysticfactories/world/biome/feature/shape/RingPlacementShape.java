@@ -19,11 +19,13 @@ public class RingPlacementShape implements PlacementShape {
     @Override
     public List<TilePos> getPositions(World world, Random random, int chunkX, int chunkY, int attempts) {
         List<TilePos> positions = new ArrayList<>();
+        int centerX = chunkX * ChunkPos.SIZE + ChunkPos.HALF_SIZE;
+        int centerY = chunkY * ChunkPos.SIZE + ChunkPos.HALF_SIZE;
         for (int i = 0; i < attempts; i++) {
             int r = radius.get(random);
             double angle = random.nextDouble() * 2 * Math.PI;
-            int x = chunkX * ChunkPos.SIZE + (ChunkPos.HALF_SIZE) + (int) (r * Math.cos(angle));
-            int y = chunkY * ChunkPos.SIZE + (ChunkPos.HALF_SIZE) + (int) (r * Math.sin(angle));
+            int x = centerX + (int) (r * Math.cos(angle));
+            int y = centerY + (int) (r * Math.sin(angle));
             positions.add(new TilePos(x, y));
         }
 

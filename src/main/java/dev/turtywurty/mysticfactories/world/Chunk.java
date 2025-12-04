@@ -28,4 +28,12 @@ public class Chunk {
     public Optional<TileType> getTile(TilePos tilePos) {
         return Optional.ofNullable(this.tiles.get(tilePos));
     }
+
+    public boolean contains(TilePos pos) {
+        return this.tiles.containsKey(pos);
+    }
+
+    public boolean contains(int x, int y) {
+        return contains(new TilePos(x, y));
+    }
 }

@@ -7,21 +7,25 @@ public class ChunkPos extends Vector2i {
     public static final int SIZE = 32;
     public static final int HALF_SIZE = SIZE / 2;
 
-    public ChunkPos(int x, int y) {
-        super(x, y);
+    public ChunkPos(int x, int z) {
+        super(x, z);
     }
 
     public ChunkPos() {
         super();
     }
 
-    public TilePos toTilePos(int localX, int localY) {
-        return new TilePos(this.x * SIZE + localX, this.y * SIZE + localY);
+    public int z() {
+        return this.y;
+    }
+
+    public TilePos toTilePos(int localX, int localZ) {
+        return new TilePos(this.x * SIZE + localX, z() * SIZE + localZ);
     }
 
     public static ChunkPos fromTilePos(TilePos tilePos) {
         int chunkX = Math.floorDiv(tilePos.x(), SIZE);
-        int chunkY = Math.floorDiv(tilePos.y(), SIZE);
-        return new ChunkPos(chunkX, chunkY);
+        int chunkZ = Math.floorDiv(tilePos.y(), SIZE);
+        return new ChunkPos(chunkX, chunkZ);
     }
 }

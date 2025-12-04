@@ -1,8 +1,10 @@
 package dev.turtywurty.mysticfactories.world.tile;
 
+import dev.turtywurty.mysticfactories.util.Direction;
 import dev.turtywurty.mysticfactories.world.ChunkPos;
 import lombok.ToString;
 import org.joml.Vector2i;
+import org.joml.Vector2ic;
 
 @ToString
 public class TilePos extends Vector2i {
@@ -16,6 +18,10 @@ public class TilePos extends Vector2i {
 
     public TilePos add(TilePos other) {
         return new TilePos(this.x + other.x, this.y + other.y);
+    }
+
+    public TilePos add(Vector2ic other) {
+        return new TilePos(this.x + other.x(), this.y + other.y());
     }
 
     public TilePos sub(TilePos other) {
@@ -39,12 +45,20 @@ public class TilePos extends Vector2i {
     }
 
     public long toLong() {
-        return (((long) this.x) & 0xFFFFFFFFL) | ((((long) this.y) & 0xFFFFFFFFL) << 32);
+        return (((long) this.x) & 0xFFFFFFFFL) | ((((long) this.y & 0xFFFFFFFFL) << 32));
     }
 
     public static TilePos fromLong(long packed) {
         int x = (int) (packed & 0xFFFFFFFFL);
         int y = (int) ((packed >> 32) & 0xFFFFFFFFL);
         return new TilePos(x, y);
+    }
+
+    public TilePos offset(Direction direction) {
+        return offset(direction, 1);
+    }
+
+    public TilePos offset(Direction direction, int steps) {
+        return add(direction.toDelta().mul(steps));
     }
 }

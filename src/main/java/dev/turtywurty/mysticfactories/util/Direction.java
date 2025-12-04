@@ -1,7 +1,8 @@
 package dev.turtywurty.mysticfactories.util;
 
-import org.joml.Random;
 import org.joml.Vector2i;
+
+import java.util.Random;
 
 public enum Direction {
     NORTH,

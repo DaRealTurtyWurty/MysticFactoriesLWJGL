@@ -1,18 +1,18 @@
 package dev.turtywurty.mysticfactories.world.biome;
 
 import dev.turtywurty.mysticfactories.world.biome.feature.FeatureRule;
+import dev.turtywurty.mysticfactories.world.biome.spawning.EntitySpawnRule;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public record Biome(ClimateProfile climateProfile, SurfaceProfile surfaceProfile, List<FeatureRule> featureRules,
-                    List<EntitySpawnRule> entitySpawnRules, VisualProfile visualProfile) {
+                    List<EntitySpawnRule> entitySpawnRules) {
     public static class Builder {
         private ClimateProfile climateProfile;
         private SurfaceProfile surfaceProfile;
         private final List<FeatureRule> featureRules = new ArrayList<>();
         private final List<EntitySpawnRule> entitySpawnRules = new ArrayList<>();
-        private VisualProfile visualProfile;
 
         public Builder climateProfile(ClimateProfile climateProfile) {
             this.climateProfile = climateProfile;
@@ -34,13 +34,8 @@ public record Biome(ClimateProfile climateProfile, SurfaceProfile surfaceProfile
             return this;
         }
 
-        public Builder visualProfile(VisualProfile visualProfile) {
-            this.visualProfile = visualProfile;
-            return this;
-        }
-
         public Biome build() {
-            return new Biome(climateProfile, surfaceProfile, featureRules, entitySpawnRules, visualProfile);
+            return new Biome(climateProfile, surfaceProfile, featureRules, entitySpawnRules);
         }
     }
 }

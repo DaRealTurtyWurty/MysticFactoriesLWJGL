@@ -1,6 +1,7 @@
 package dev.turtywurty.mysticfactories.world.biome.feature;
 
 import dev.turtywurty.mysticfactories.util.Identifier;
+import dev.turtywurty.mysticfactories.world.biome.IntProvider;
 import dev.turtywurty.mysticfactories.world.biome.feature.shape.PlacementShape;
 
 import java.util.Optional;

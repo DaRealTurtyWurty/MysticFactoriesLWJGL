@@ -3,14 +3,12 @@ package dev.turtywurty.mysticfactories.world.biome;
 import java.util.Random;
 
 public abstract class IntProvider {
-    protected final Random random = new Random();
-
-    public abstract int get(float x, float y);
+    public abstract int get(Random random);
 
     public static IntProvider constant(int value) {
         return new IntProvider() {
             @Override
-            public int get(float x, float y) {
+            public int get(Random random) {
                 return value;
             }
         };
@@ -19,8 +17,7 @@ public abstract class IntProvider {
     public static IntProvider noise(float scale, float amplitude) {
         return new IntProvider() {
             @Override
-            public int get(float x, float y) {
-                random.setSeed((long) (x * 49632 + y * 325176 + 123456789));
+            public int get(Random random) {
                 return (int) (((random.nextFloat() * 2 - 1) * amplitude) / scale);
             }
         };
@@ -29,8 +26,7 @@ public abstract class IntProvider {
     public static IntProvider uniform(int min, int max) {
         return new IntProvider() {
             @Override
-            public int get(float x, float y) {
-                random.setSeed((long) (x * 98765 + y * 43210 + 987654321));
+            public int get(Random random) {
                 return min + random.nextInt(max - min + 1);
             }
         };
@@ -39,14 +35,9 @@ public abstract class IntProvider {
     public static IntProvider linearGradient(int startValue, int endValue, int startX, int endX) {
         return new IntProvider() {
             @Override
-            public int get(float x, float y) {
-                if (x <= startX)
-                    return startValue;
-
-                if (x >= endX)
-                    return endValue;
-
-                float t = (x - startX) / (endX - startX);
+            public int get(Random random) {
+                float position = startX + random.nextFloat() * (endX - startX);
+                float t = (position - startX) / (endX - startX);
                 return (int) (startValue + t * (endValue - startValue));
             }
         };
@@ -55,8 +46,8 @@ public abstract class IntProvider {
     public static IntProvider composite(IntProvider a, IntProvider b, float weight) {
         return new IntProvider() {
             @Override
-            public int get(float x, float y) {
-                return (int) (a.get(x, y) * (1 - weight) + b.get(x, y) * weight);
+            public int get(Random random) {
+                return (int) (a.get(random) * (1 - weight) + b.get(random) * weight);
             }
         };
     }
@@ -64,8 +55,8 @@ public abstract class IntProvider {
     public static IntProvider scaled(IntProvider provider, int scale) {
         return new IntProvider() {
             @Override
-            public int get(float x, float y) {
-                return provider.get(x, y) * scale;
+            public int get(Random random) {
+                return provider.get(random) * scale;
             }
         };
     }
@@ -73,17 +64,18 @@ public abstract class IntProvider {
     public static IntProvider trapezoidal(int min, int lowerMax, int upperMin, int max) {
         return new IntProvider() {
             @Override
-            public int get(float x, float y) {
-                if (x < min || x > max)
+            public int get(Random random) {
+                float sampleX = min + random.nextFloat() * (max - min);
+                if (sampleX < min || sampleX > max)
                     return 0;
 
-                if (x >= lowerMax && x <= upperMin)
+                if (sampleX >= lowerMax && sampleX <= upperMin)
                     return 1;
 
-                if (x >= min && x < lowerMax)
-                    return (int) ((x - min) / (lowerMax - min));
+                if (sampleX >= min && sampleX < lowerMax)
+                    return (int) ((sampleX - min) / (lowerMax - min));
 
-                return (int) ((max - x) / (max - upperMin));
+                return (int) ((max - sampleX) / (max - upperMin));
             }
         };
     }

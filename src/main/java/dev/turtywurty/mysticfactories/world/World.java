@@ -56,6 +56,10 @@ public abstract class World implements WorldView {
         return Optional.ofNullable(this.chunks.get(pos));
     }
 
+    public Optional<Chunk> getChunk(int chunkX, int chunkZ) {
+        return Optional.ofNullable(this.chunks.get(new ChunkPos(chunkX, chunkZ)));
+    }
+
     public void addChunk(ChunkPos pos) {
         this.chunks.computeIfAbsent(pos, chunkPos -> {
             Chunk chunk = new Chunk(chunkPos);
