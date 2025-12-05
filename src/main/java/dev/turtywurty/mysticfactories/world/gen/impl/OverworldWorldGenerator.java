@@ -5,6 +5,7 @@ import dev.turtywurty.mysticfactories.world.Chunk;
 import dev.turtywurty.mysticfactories.world.WorldView;
 import dev.turtywurty.mysticfactories.world.biome.Biome;
 import dev.turtywurty.mysticfactories.world.gen.WorldGenerator;
+import dev.turtywurty.mysticfactories.world.seed.SeedSource;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
 import dev.turtywurty.mysticfactories.world.tile.TileType;
 import personthecat.fastnoise.FastNoise;
@@ -15,8 +16,8 @@ public class OverworldWorldGenerator implements WorldGenerator {
     private final FastNoise noise;
     private final long seed;
 
-    public OverworldWorldGenerator(long seed) {
-        this.seed = seed;
+    public OverworldWorldGenerator(SeedSource seedSource) {
+        this.seed = seedSource.get();
         this.noise = createOverworldNoise(seed);
     }
 

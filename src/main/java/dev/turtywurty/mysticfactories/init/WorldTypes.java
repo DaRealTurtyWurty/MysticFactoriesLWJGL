@@ -5,6 +5,7 @@ import dev.turtywurty.mysticfactories.world.WorldType;
 import dev.turtywurty.mysticfactories.world.WorldTypeRegistry;
 import dev.turtywurty.mysticfactories.world.gen.WorldGenerator;
 import dev.turtywurty.mysticfactories.world.gen.impl.OverworldWorldGenerator;
+import dev.turtywurty.mysticfactories.world.seed.RandomSeedSource;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -15,8 +16,8 @@ public class WorldTypes {
     }
 
     public static void register(WorldTypeRegistry registry) {
-        // TODO: Have a SeedSource, and also turn this into a lambda/factory
-        WorldGenerator overworldGenerator = new OverworldWorldGenerator(ThreadLocalRandom.current().nextLong());
+        // TODO: turn this into a lambda/factory
+        WorldGenerator overworldGenerator = new OverworldWorldGenerator(new RandomSeedSource());
 
         OVERWORLD = registry.register(new WorldType(Identifier.of("overworld"), overworldGenerator));
     }
