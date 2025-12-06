@@ -6,7 +6,8 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class ScissorStack {
-    private record ScissorRect(int x, int y, int width, int height) {}
+    private record ScissorRect(int x, int y, int width, int height) {
+    }
 
     private final Deque<ScissorRect> stack = new ArrayDeque<>();
     private final DrawContext context;
@@ -18,9 +19,10 @@ public class ScissorStack {
     /**
      * Pushes a new scissor rectangle to the stack. The new rectangle is intersected
      * with the current scissor rectangle. Coordinates are in screen space (y-down).
-     * @param x top-left x
-     * @param y top-left y
-     * @param width rect width
+     *
+     * @param x      top-left x
+     * @param y      top-left y
+     * @param width  rect width
      * @param height rect height
      */
     public void push(float x, float y, float width, float height) {
@@ -43,7 +45,7 @@ public class ScissorStack {
             int intersectY1 = Math.max(newScissorY, currentY);
             int intersectX2 = Math.min(newScissorX + newScissorWidth, currentX + currentWidth);
             int intersectY2 = Math.min(newScissorY + newScissorHeight, currentY + currentHeight);
-            
+
             newScissorX = intersectX1;
             newScissorY = intersectY1;
             newScissorWidth = intersectX2 - intersectX1;
@@ -57,7 +59,7 @@ public class ScissorStack {
             int intersectY1 = Math.max(newScissorY, screenScissorY);
             int intersectX2 = Math.min(newScissorX + newScissorWidth, screenScissorX + screenWidth);
             int intersectY2 = Math.min(newScissorY + newScissorHeight, screenScissorY + screenHeight);
-            
+
             newScissorX = intersectX1;
             newScissorY = intersectY1;
             newScissorWidth = intersectX2 - intersectX1;

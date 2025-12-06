@@ -64,7 +64,7 @@ public final class GUIStack implements InputListener {
     private void renderInternal(DrawContext context) {
         // Iterate from bottom to top so higher GUIs draw over lower ones.
         List<GUI> copy = List.copyOf(this.guis);
-        for(GUI gui : copy) {
+        for (GUI gui : copy) {
             gui.preRender(context);
         }
 

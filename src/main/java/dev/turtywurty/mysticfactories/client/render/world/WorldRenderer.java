@@ -10,7 +10,6 @@ import dev.turtywurty.mysticfactories.world.Chunk;
 import dev.turtywurty.mysticfactories.world.ChunkPos;
 import dev.turtywurty.mysticfactories.world.entity.Entity;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
-import dev.turtywurty.mysticfactories.world.tile.TileRegistry;
 import dev.turtywurty.mysticfactories.world.tile.TileType;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -31,9 +30,9 @@ public class WorldRenderer {
     private final Map<ChunkPos, ChunkRenderData> chunkMeshes = new HashMap<>();
     private final TileAtlas tileAtlas;
 
-    public WorldRenderer(EntityRendererRegistry entityRendererRegistry, TileRegistry tileRegistry) {
+    public WorldRenderer(EntityRendererRegistry entityRendererRegistry) {
         this.entityRendererRegistry = entityRendererRegistry;
-        this.tileAtlas = TileAtlas.build(tileRegistry);
+        this.tileAtlas = TileAtlas.build();
     }
 
     public void render(ClientWorld world, TileRenderContext tileRenderContext, EntityRenderContext entityRenderContext) {

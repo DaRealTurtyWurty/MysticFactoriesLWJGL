@@ -45,7 +45,8 @@ public class Tab {
         private String title = "";
         private Widget content;
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder title(String title) {
             this.title = title;

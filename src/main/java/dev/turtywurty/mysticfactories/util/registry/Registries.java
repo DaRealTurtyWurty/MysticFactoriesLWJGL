@@ -1,16 +1,41 @@
 package dev.turtywurty.mysticfactories.util.registry;
 
 import dev.turtywurty.mysticfactories.util.Identifier;
+import dev.turtywurty.mysticfactories.world.WorldType;
+import dev.turtywurty.mysticfactories.world.entity.Entity;
+import dev.turtywurty.mysticfactories.world.entity.EntityType;
+import dev.turtywurty.mysticfactories.world.tile.TileType;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Registries {
-    private static final Map<Identifier, Registry<?>> REGISTRIES = new LinkedHashMap<>();
+    private static final Map<RegistryKey<?>, Registry<?>> REGISTRIES = new LinkedHashMap<>();
 
-    public static <T extends Registerable> Registry<T> createRegistry(Identifier id, Identifier defaultId) {
-        Registry<T> registry = new DefaultedRegistry<>(id);
-        REGISTRIES.put(id, registry);
+    public static final Registry<EntityType<? extends Entity>> ENTITY_TYPES = createRegistry(RegistryKeys.ENTITY_TYPES, Identifier.of("default")); // TODO: Replace with actual default ID
+    public static final Registry<TileType> TILE_TYPES = createRegistry(RegistryKeys.TILE_TYPES, Identifier.of("default")); // TODO: Replace with actual default ID
+    public static final Registry<WorldType> WORLD_TYPES = createRegistry(RegistryKeys.WORLD_TYPES, Identifier.of("default")); // TODO: Replace with actual default ID
+
+    public static <T extends Registerable> Registry<T> createRegistry(RegistryKey<T> key, Identifier defaultId) {
+        Registry<T> registry = new DefaultedRegistry<>(defaultId);
+        REGISTRIES.put(key, registry);
         return registry;
+    }
+
+    public static <T extends Registerable> Registry<T> getRegistry(RegistryKey<T> key) {
+        @SuppressWarnings("unchecked")
+        Registry<T> registry = (Registry<T>) REGISTRIES.get(key);
+        if (registry == null)
+            throw new IllegalStateException("Registry not found for key: " + key);
+
+        return registry;
+    }
+
+    public static void freezeAll() {
+        REGISTRIES.values().forEach(Registry::freeze);
+    }
+
+    public static Map<RegistryKey<?>, Registry<?>> getAllRegistries() {
+        return Map.copyOf(REGISTRIES);
     }
 }

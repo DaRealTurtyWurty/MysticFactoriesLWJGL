@@ -19,7 +19,7 @@ public class BasicEntityRenderer<T extends Entity> implements EntityRenderer<T> 
     private final float tileSize;
 
     public BasicEntityRenderer(Identifier textureId, float tileSize) {
-        this.texture = new Texture("textures/" + textureId.path() + ".png");
+        this.texture = new Texture("textures/entities/" + textureId.path() + ".png");
         this.tileSize = tileSize;
     }
 

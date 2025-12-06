@@ -5,7 +5,8 @@ import dev.turtywurty.mysticfactories.world.tile.TileType;
 import java.util.ArrayList;
 import java.util.List;
 
-public record SurfaceProfile(TileType primarySurface, TileType secondarySurface, TileType primaryFluid, List<SurfaceRule> surfaceRules) {
+public record SurfaceProfile(TileType primarySurface, TileType secondarySurface, TileType primaryFluid,
+                             List<SurfaceRule> surfaceRules) {
     public static class Builder {
         private TileType primarySurface;
         private TileType secondarySurface;

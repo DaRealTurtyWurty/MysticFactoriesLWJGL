@@ -17,6 +17,7 @@ public abstract class World implements WorldView {
     protected final List<Entity> tickingEntities = new ArrayList<>();
     protected final WorldType worldType;
     private final WorldData worldData;
+    private final WorldGenerator generator;
 
     protected World(WorldType worldType, WorldData worldData) {
         if (worldType == null)
@@ -27,6 +28,8 @@ public abstract class World implements WorldView {
 
         this.worldType = worldType;
         this.worldData = worldData;
+
+        this.generator = this.worldType.getGenerator().get();
     }
 
     protected static long randomizeWorldSeed() {
@@ -63,7 +66,6 @@ public abstract class World implements WorldView {
     public void addChunk(ChunkPos pos) {
         this.chunks.computeIfAbsent(pos, chunkPos -> {
             Chunk chunk = new Chunk(chunkPos);
-            WorldGenerator generator = this.worldType.getGenerator();
             if (generator != null) {
                 generator.generate(this, chunk);
             }

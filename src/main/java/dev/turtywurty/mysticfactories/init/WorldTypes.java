@@ -1,24 +1,25 @@
 package dev.turtywurty.mysticfactories.init;
 
 import dev.turtywurty.mysticfactories.util.Identifier;
+import dev.turtywurty.mysticfactories.util.registry.Registries;
 import dev.turtywurty.mysticfactories.world.WorldType;
-import dev.turtywurty.mysticfactories.world.WorldTypeRegistry;
-import dev.turtywurty.mysticfactories.world.gen.WorldGenerator;
 import dev.turtywurty.mysticfactories.world.gen.impl.OverworldWorldGenerator;
 import dev.turtywurty.mysticfactories.world.seed.RandomSeedSource;
 
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 
 public class WorldTypes {
-    public static WorldType OVERWORLD;
+    public static final WorldType OVERWORLD = register("overworld",
+            builder -> builder.generator(() -> new OverworldWorldGenerator(new RandomSeedSource())).build());
 
     private WorldTypes() {
     }
 
-    public static void register(WorldTypeRegistry registry) {
-        // TODO: turn this into a lambda/factory
-        WorldGenerator overworldGenerator = new OverworldWorldGenerator(new RandomSeedSource());
+    public static void init() {
+    }
 
-        OVERWORLD = registry.register(new WorldType(Identifier.of("overworld"), overworldGenerator));
+    public static WorldType register(String name, Function<WorldType.Builder, WorldType> worldType) {
+        Identifier id = Identifier.of(name);
+        return Registries.WORLD_TYPES.register(id, worldType.apply(new WorldType.Builder(id)));
     }
 }

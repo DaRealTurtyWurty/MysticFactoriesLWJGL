@@ -233,7 +233,7 @@ public class TextInput extends Widget {
             updateCursorPosition();
             return true;
         }
-        
+
         return false;
     }
 

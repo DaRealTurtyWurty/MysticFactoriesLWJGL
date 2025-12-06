@@ -1,11 +1,18 @@
 package dev.turtywurty.mysticfactories.world.entity;
 
 import dev.turtywurty.mysticfactories.util.Identifier;
+import dev.turtywurty.mysticfactories.util.registry.Registerable;
 import dev.turtywurty.mysticfactories.world.World;
 
-public record EntityType<T extends Entity>(Identifier id, EntityFactory<T> factory, boolean shouldTick) {
+public record EntityType<T extends Entity>(Identifier id, EntityFactory<T> factory,
+                                           boolean shouldTick) implements Registerable {
     public T create(World world) {
         return factory.create(this, world);
+    }
+
+    @Override
+    public Identifier getId() {
+        return id;
     }
 
     @FunctionalInterface

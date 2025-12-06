@@ -1,10 +1,12 @@
 package dev.turtywurty.mysticfactories.client.render.world.tile;
 
 import dev.turtywurty.mysticfactories.util.Identifier;
-import dev.turtywurty.mysticfactories.world.tile.TileRegistry;
+import dev.turtywurty.mysticfactories.util.registry.Registries;
 import dev.turtywurty.mysticfactories.world.tile.TileType;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.*;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.stb.STBImage;
 
 import java.io.IOException;
@@ -18,8 +20,8 @@ import java.util.Map;
  * Packs tile textures into a single atlas texture and provides UV ranges for each tile.
  */
 public record TileAtlas(int textureId, int width, int height, Map<Identifier, UV> uvMap) {
-    public static TileAtlas build(TileRegistry tileRegistry) {
-        Map<Identifier, ImageData> images = loadImages(tileRegistry);
+    public static TileAtlas build() {
+        Map<Identifier, ImageData> images = loadImages();
         if (images.isEmpty())
             throw new IllegalStateException("No tile textures available to build atlas");
 
@@ -67,16 +69,16 @@ public record TileAtlas(int textureId, int width, int height, Map<Identifier, UV
         GL11.glDeleteTextures(this.textureId);
     }
 
-    private static Map<Identifier, ImageData> loadImages(TileRegistry tileRegistry) {
+    private static Map<Identifier, ImageData> loadImages() {
         Map<Identifier, ImageData> images = new LinkedHashMap<>();
-        tileRegistry.getAll().forEach((id, tile) -> {
-            String path = "textures/" + id.path() + ".png";
+        for (Identifier id : Registries.TILE_TYPES.getIds()) {
+            String path = "textures/tiles/" + id.path() + ".png";
             try {
                 images.put(id, loadImage(path));
             } catch (IOException exception) {
                 throw new IllegalStateException("Failed to load tile texture: " + path, exception);
             }
-        });
+        }
 
         return images;
     }
