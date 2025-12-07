@@ -33,8 +33,6 @@ public class OverworldWorldGenerator implements WorldGenerator {
 
     @Override
     public void generate(WorldView world, Chunk chunk) {
-        long seed = world.getWorldData().getSeed();
-
         for (int x = 0; x < Chunk.SIZE; x++) {
             for (int z = 0; z < Chunk.SIZE; z++) {
                 var pos = new TilePos(
