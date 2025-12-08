@@ -3,16 +3,31 @@ package dev.turtywurty.mysticfactories.world.entity;
 import dev.turtywurty.mysticfactories.util.Identifier;
 import dev.turtywurty.mysticfactories.util.registry.Registerable;
 import dev.turtywurty.mysticfactories.world.World;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-public record EntityType<T extends Entity>(Identifier id, EntityFactory<T> factory,
-                                           boolean shouldTick) implements Registerable {
-    public T create(World world) {
-        return factory.create(this, world);
+@EqualsAndHashCode
+@ToString
+@Getter
+public final class EntityType<T extends Entity> implements Registerable {
+    @Setter
+    private Identifier id;
+    private final EntityFactory<T> factory;
+    private final boolean shouldTick;
+
+    public EntityType(EntityFactory<T> factory, boolean shouldTick) {
+        this.factory = factory;
+        this.shouldTick = shouldTick;
     }
 
-    @Override
-    public Identifier getId() {
-        return id;
+    public static <T extends Entity> Builder<T> builder() {
+        return new Builder<>();
+    }
+
+    public T create(World world) {
+        return factory.create(this, world);
     }
 
     @FunctionalInterface
@@ -21,13 +36,8 @@ public record EntityType<T extends Entity>(Identifier id, EntityFactory<T> facto
     }
 
     public static class Builder<T extends Entity> {
-        private final Identifier id;
         private EntityFactory<T> factory;
         private boolean shouldTick = true;
-
-        public Builder(Identifier id) {
-            this.id = id;
-        }
 
         public Builder<T> factory(EntityFactory<T> factory) {
             this.factory = factory;
@@ -43,7 +53,7 @@ public record EntityType<T extends Entity>(Identifier id, EntityFactory<T> facto
             if (factory == null)
                 throw new IllegalStateException("EntityFactory must be set before building EntityType");
 
-            return new EntityType<>(id, factory, shouldTick);
+            return new EntityType<>(factory, shouldTick);
         }
     }
 }

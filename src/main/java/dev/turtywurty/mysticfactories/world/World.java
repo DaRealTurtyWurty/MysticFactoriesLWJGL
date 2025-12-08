@@ -1,5 +1,6 @@
 package dev.turtywurty.mysticfactories.world;
 
+import dev.turtywurty.mysticfactories.world.biome.Biome;
 import dev.turtywurty.mysticfactories.world.entity.Entity;
 import dev.turtywurty.mysticfactories.world.gen.WorldGenerator;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
@@ -55,6 +56,19 @@ public abstract class World implements WorldView {
         return chunkOpt.flatMap(chunk -> chunk.getTile(pos));
     }
 
+    public Optional<Biome> getBiome(TilePos pos) {
+        ChunkPos chunkPos = ChunkPos.fromTilePos(pos);
+        Optional<Chunk> chunkOpt = getChunk(chunkPos);
+        Optional<Biome> storedBiome = chunkOpt.flatMap(chunk -> chunk.getBiome(pos));
+        if (storedBiome.isPresent())
+            return storedBiome;
+
+        if (this.generator == null)
+            return Optional.empty();
+
+        return Optional.ofNullable(this.generator.getBiome(pos.x, pos.y));
+    }
+
     public Optional<Chunk> getChunk(ChunkPos pos) {
         return Optional.ofNullable(this.chunks.get(pos));
     }
@@ -86,7 +100,7 @@ public abstract class World implements WorldView {
 
     public void addEntity(Entity entity) {
         this.entities.add(entity);
-        if (entity.getType().shouldTick()) {
+        if (entity.getType().isShouldTick()) {
             this.tickingEntities.add(entity);
         }
 

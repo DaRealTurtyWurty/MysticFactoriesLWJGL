@@ -2,28 +2,29 @@ package dev.turtywurty.mysticfactories.world.tile;
 
 import dev.turtywurty.mysticfactories.util.Identifier;
 import dev.turtywurty.mysticfactories.util.registry.Registerable;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
+@EqualsAndHashCode
+@ToString
 @Getter
 public class TileType implements Registerable {
-    private final Identifier id;
+    @Setter
+    private Identifier id;
     private final boolean solid;
 
-    public TileType(Identifier id, boolean solid) {
-        if (id == null)
-            throw new IllegalArgumentException("TileType id cannot be null");
-
-        this.id = id;
+    public TileType(boolean solid) {
         this.solid = solid;
     }
 
-    public static class Builder {
-        private final Identifier id;
-        private boolean solid = true;
+    public static Builder builder() {
+        return new Builder();
+    }
 
-        public Builder(Identifier id) {
-            this.id = id;
-        }
+    public static class Builder {
+        private boolean solid = true;
 
         public Builder notSolid() {
             this.solid = false;
@@ -31,7 +32,7 @@ public class TileType implements Registerable {
         }
 
         public TileType build() {
-            return new TileType(this.id, this.solid);
+            return new TileType(this.solid);
         }
     }
 }

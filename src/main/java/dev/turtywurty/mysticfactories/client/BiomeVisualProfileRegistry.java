@@ -23,7 +23,7 @@ public class BiomeVisualProfileRegistry {
     }
 
     public void register(Biome biome, VisualProfile visualProfile) {
-        // TODO: Use biome registry to get biome identifier
+        register(biome.getId(), visualProfile);
     }
 
     public VisualProfile get(Identifier identifier) {
@@ -31,7 +31,7 @@ public class BiomeVisualProfileRegistry {
     }
 
     public VisualProfile get(Biome biome) {
-        return null; // TODO: Use biome registry to get biome identifier
+        return get(biome.getId());
     }
 
     public boolean contains(Identifier identifier) {

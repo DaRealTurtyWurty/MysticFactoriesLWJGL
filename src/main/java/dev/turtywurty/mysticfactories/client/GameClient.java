@@ -18,20 +18,24 @@ import dev.turtywurty.mysticfactories.client.window.Window;
 import dev.turtywurty.mysticfactories.client.world.ClientWorld;
 import dev.turtywurty.mysticfactories.client.world.LocalWorldConnection;
 import dev.turtywurty.mysticfactories.init.EntityTypes;
-import dev.turtywurty.mysticfactories.init.TileTypes;
 import dev.turtywurty.mysticfactories.init.WorldTypes;
 import dev.turtywurty.mysticfactories.server.IntegratedServer;
 import dev.turtywurty.mysticfactories.server.ServerWorld;
 import dev.turtywurty.mysticfactories.util.Identifier;
-import dev.turtywurty.mysticfactories.util.registry.Registries;
+import dev.turtywurty.mysticfactories.util.registry.RegistryKeys;
+import dev.turtywurty.mysticfactories.util.registry.RegistryLifecycle;
+import dev.turtywurty.mysticfactories.util.registry.RegistryScanner;
 import dev.turtywurty.mysticfactories.world.ChunkPos;
+import dev.turtywurty.mysticfactories.world.biome.BiomeMapExporter;
 import dev.turtywurty.mysticfactories.world.entity.Entity;
+import dev.turtywurty.mysticfactories.world.tile.TilePos;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
+import java.nio.file.Path;
 import java.util.Optional;
 
 public class GameClient implements Runnable {
@@ -46,6 +50,7 @@ public class GameClient implements Runnable {
     private @Nullable IntegratedServer integratedServer; // null when connected to remote
     private ClientWorld clientWorld;
     private WorldRenderer worldRenderer;
+    private int fps, ups;
 
     public GameClient() {
         this.window = new Window("Mystic Factories");
@@ -68,10 +73,16 @@ public class GameClient implements Runnable {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        EntityTypes.init();
-        WorldTypes.init();
-        TileTypes.init();
-        Registries.freezeAll();
+        RegistryScanner.scanForRegistryHolders();
+        System.out.println("Registries scanned.");
+
+        var lifecycle = new RegistryLifecycle();
+        lifecycle.add(RegistryKeys.TILE_TYPES);
+        lifecycle.add(RegistryKeys.ENTITY_TYPES);
+        lifecycle.add(RegistryKeys.WORLD_GENERATORS);
+        lifecycle.add(RegistryKeys.BIOMES);
+        lifecycle.add(RegistryKeys.WORLD_TYPES);
+        lifecycle.freeze();
 
         this.camera = new Camera(new Vector2f(0.0f, 0.0f), 200f);
         this.camera.setOrthoBounds(this.window.getWidth(), this.window.getHeight());
@@ -119,6 +130,8 @@ public class GameClient implements Runnable {
             }
 
             if (timer >= 1.0) {
+                this.fps = frames;
+                this.ups = ticks;
                 System.out.println("FPS: " + frames + " | UPS: " + ticks);
                 frames = 0;
                 ticks = 0;
@@ -129,9 +142,8 @@ public class GameClient implements Runnable {
 
     private void sync(long frameStartTimeNanos) {
         int fpsCap = Settings.getInstance().getFpsCap();
-        if (fpsCap <= 0) {
+        if (fpsCap <= 0)
             return;
-        }
 
         long frameDuration = 1_000_000_000L / fpsCap;
         long endTime = frameStartTimeNanos + frameDuration;
@@ -203,7 +215,7 @@ public class GameClient implements Runnable {
             return;
 
         var entityRendererRegistry = new EntityRendererRegistry();
-        entityRendererRegistry.registerRenderer(EntityTypes.PLAYER, new BasicEntityRenderer<>(EntityTypes.PLAYER.id(), 16.0f));
+        entityRendererRegistry.registerRenderer(EntityTypes.PLAYER, new BasicEntityRenderer<>(EntityTypes.PLAYER.getId(), 16.0f));
         this.worldRenderer = new WorldRenderer(entityRendererRegistry);
 
         // Integrated server for singleplayer
@@ -214,6 +226,9 @@ public class GameClient implements Runnable {
                 overworld.addChunk(new ChunkPos(chunkX, chunkY));
             }
         }
+
+        Path biomeMapPath = Path.of("build", "biome_map.png");
+        BiomeMapExporter.export(overworld, biomeMapPath);
 
         this.integratedServer.addWorld(overworld);
 
@@ -244,6 +259,28 @@ public class GameClient implements Runnable {
                             return String.format("X: %.2f, Y: %.2f", pos.x, pos.y);
                         })
                         .position(8, 8)
+                        .build());
+
+        HUDManager.addLastElement(Identifier.of("debug_biome"),
+                TextLabel.builder()
+                        .textSupplier(() -> {
+                            Optional<Entity> localPlayerOpt = this.clientWorld.getLocalPlayer();
+                            if (localPlayerOpt.isEmpty())
+                                return "Biome: unknown";
+
+                            Vector2d pos = localPlayerOpt.get().getPosition();
+                            var tilePos = new TilePos((int) Math.floor(pos.x), (int) Math.floor(pos.y));
+                            return this.clientWorld.getBiome(tilePos)
+                                    .map(biome -> "Biome: " + biome.getId())
+                                    .orElse("Biome: unknown");
+                        })
+                        .position(8, 28)
+                        .build());
+
+        HUDManager.addLastElement(Identifier.of("debug_fps"),
+                TextLabel.builder()
+                        .textSupplier(() -> "FPS: %d, UPS: %d".formatted(this.fps, this.ups))
+                        .position(8, 48)
                         .build());
 
         GUIStack.pop();

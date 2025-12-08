@@ -4,4 +4,6 @@ import dev.turtywurty.mysticfactories.util.Identifier;
 
 public interface Registerable {
     Identifier getId();
+
+    void setId(Identifier id);
 }

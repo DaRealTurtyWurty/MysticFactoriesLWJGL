@@ -25,6 +25,8 @@ public class DefaultedRegistry<T extends Registerable> implements Registry<T> {
         if (this.entries.containsKey(id))
             throw new IllegalStateException("Entry already registered for id: " + id);
 
+        entry.setId(id);
+
         this.entries.put(id, Objects.requireNonNull(entry, "Registry entry cannot be null"));
         return entry;
     }

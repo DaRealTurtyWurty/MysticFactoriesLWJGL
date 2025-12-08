@@ -52,4 +52,14 @@ public class RegistryLifecycle {
     public int size() {
         return this.order.size();
     }
+
+    /**
+     * Freeze registries in the explicit order provided. This prevents further registrations.
+     */
+    public void freeze() {
+        for (RegistryKey<?> key : this.order) {
+            Registry<?> registry = Registries.getRegistry(key);
+            registry.freeze();
+        }
+    }
 }
