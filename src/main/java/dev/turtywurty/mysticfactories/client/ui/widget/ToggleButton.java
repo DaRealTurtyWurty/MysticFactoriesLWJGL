@@ -59,15 +59,15 @@ public class ToggleButton extends AbstractButton {
         this.offText = Objects.requireNonNull(offText, "offText");
     }
 
+    public boolean isOn() {
+        return this.toggled;
+    }
+
     /**
      * Sets the current toggle state.
      */
     public void setOn(boolean toggled) {
         this.toggled = toggled;
-    }
-
-    public boolean isOn() {
-        return this.toggled;
     }
 
     /**

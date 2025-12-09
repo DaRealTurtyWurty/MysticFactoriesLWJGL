@@ -28,6 +28,10 @@ dependencies {
     implementation "de.articdive:jnoise-pipeline:4.1.0"
     implementation "com.mojang:datafixerupper:8.0.16"
     implementation "org.reflections:reflections:0.10.2"
+    implementation "org.slf4j:slf4j-api:2.0.13"
+    implementation "ch.qos.logback:logback-classic:1.5.12"
+    // Explicit to ensure rolling policies (like OnStartupTriggeringPolicy) are available at runtime
+    implementation "ch.qos.logback:logback-core:1.5.12"
 
     compileOnly "org.projectlombok:lombok:1.18.42"
     annotationProcessor "org.projectlombok:lombok:1.18.42"

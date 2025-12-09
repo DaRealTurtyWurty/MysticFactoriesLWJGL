@@ -3,8 +3,6 @@ package dev.turtywurty.mysticfactories.world.biome;
 import java.util.Random;
 
 public abstract class FloatProvider {
-    public abstract float get(Random random);
-
     public static FloatProvider constant(float value) {
         return new FloatProvider() {
             @Override
@@ -79,4 +77,6 @@ public abstract class FloatProvider {
             }
         };
     }
+
+    public abstract float get(Random random);
 }

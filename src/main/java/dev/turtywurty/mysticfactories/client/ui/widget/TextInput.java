@@ -6,11 +6,15 @@ import dev.turtywurty.mysticfactories.client.ui.DrawContext;
 import dev.turtywurty.mysticfactories.client.util.ClipboardUtils;
 import lombok.Getter;
 import org.lwjgl.glfw.GLFW;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 
 public class TextInput extends Widget {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TextInput.class);
+    private final SelectionRange selectionRange = new SelectionRange(0, 0);
     @Getter
     private String text = "";
     private int maxLength = 256;
@@ -18,12 +22,9 @@ public class TextInput extends Widget {
     private boolean focused = false;
     private String placeholder = "";
     private FontAtlas font = Fonts.defaultFont();
-
+    private final Cursor cursor = new Cursor(0, 0, this.font);
     private int cursorPosition = 0;
     private int offset = 0;
-    private final SelectionRange selectionRange = new SelectionRange(0, 0);
-    private final Cursor cursor = new Cursor(0, 0, this.font);
-
     private int backgroundColor = 0xFF000000;
     private int borderColor = 0xFF888888;
     private int focusBorderColor = 0xFFFFFFFF;
@@ -207,8 +208,7 @@ public class TextInput extends Widget {
             try {
                 clipboardText = ClipboardUtils.copyStringFromClipboard();
             } catch (UnsupportedFlavorException | IOException exception) {
-                System.err.printf("Failed to get clipboard contents: %s%n", exception.getMessage());
-                exception.printStackTrace();
+                LOGGER.error("Failed to get clipboard contents", exception);
             }
 
             if (clipboardText != null && !clipboardText.isEmpty()) {

@@ -16,6 +16,24 @@ public class Mouse {
     @Getter
     private static boolean scrollMoved = false;
 
+    public static boolean isButtonDown(int button) {
+        return BUTTONS[button];
+    }
+
+    public static double getScrollX() {
+        return xScrollOffset;
+    }
+
+    public static double getScrollY() {
+        return yScrollOffset;
+    }
+
+    public static void resetScrollMoved() {
+        scrollMoved = false;
+        xScrollOffset = 0.0;
+        yScrollOffset = 0.0;
+    }
+
     public static class MouseButtonCallback extends GLFWMouseButtonCallback {
         @Override
         public void invoke(long window, int button, int action, int mods) {
@@ -40,23 +58,5 @@ public class Mouse {
             yScrollOffset = yoffset;
             scrollMoved = true;
         }
-    }
-
-    public static boolean isButtonDown(int button) {
-        return BUTTONS[button];
-    }
-
-    public static double getScrollX() {
-        return xScrollOffset;
-    }
-
-    public static double getScrollY() {
-        return yScrollOffset;
-    }
-
-    public static void resetScrollMoved() {
-        scrollMoved = false;
-        xScrollOffset = 0.0;
-        yScrollOffset = 0.0;
     }
 }

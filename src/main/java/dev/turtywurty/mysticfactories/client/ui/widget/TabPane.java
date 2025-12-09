@@ -393,12 +393,12 @@ public class TabPane extends Widget {
     }
 
     public static final class Builder {
+        private final List<Tab> tabs = new ArrayList<>();
         private float x;
         private float y;
         private float width;
         private float height;
         private FontAtlas font = Fonts.defaultFont();
-        private final List<Tab> tabs = new ArrayList<>();
         private int selectedIndex = 0;
 
         private float tabHeight = 28f;

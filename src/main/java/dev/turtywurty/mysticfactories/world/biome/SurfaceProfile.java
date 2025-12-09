@@ -8,10 +8,10 @@ import java.util.List;
 public record SurfaceProfile(TileType primarySurface, TileType secondarySurface, TileType primaryFluid,
                              List<SurfaceRule> surfaceRules) {
     public static class Builder {
+        private final List<SurfaceRule> surfaceRules = new ArrayList<>();
         private TileType primarySurface;
         private TileType secondarySurface;
         private TileType primaryFluid;
-        private final List<SurfaceRule> surfaceRules = new ArrayList<>();
 
         public Builder primarySurface(TileType primarySurface) {
             this.primarySurface = primarySurface;

@@ -12,10 +12,10 @@ import lombok.ToString;
 @ToString
 @Getter
 public final class EntityType<T extends Entity> implements Registerable {
-    @Setter
-    private Identifier id;
     private final EntityFactory<T> factory;
     private final boolean shouldTick;
+    @Setter
+    private Identifier id;
 
     public EntityType(EntityFactory<T> factory, boolean shouldTick) {
         this.factory = factory;

@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ObservableProperty<T> {
-    private T value;
     private final transient List<Consumer<T>> listeners = new ArrayList<>();
+    private T value;
 
     public ObservableProperty(T initial) {
         this.value = initial;

@@ -61,6 +61,11 @@ public final class GUIStack implements InputListener {
         INSTANCE.renderInternal(context);
     }
 
+    public static boolean shouldPauseGame() {
+        GUI top = peek();
+        return top != null && top.shouldPauseGame();
+    }
+
     private void renderInternal(DrawContext context) {
         // Iterate from bottom to top so higher GUIs draw over lower ones.
         List<GUI> copy = List.copyOf(this.guis);
@@ -139,10 +144,5 @@ public final class GUIStack implements InputListener {
         if (top != null) {
             top.onUpdate(deltaTime);
         }
-    }
-
-    public static boolean shouldPauseGame() {
-        GUI top = peek();
-        return top != null && top.shouldPauseGame();
     }
 }

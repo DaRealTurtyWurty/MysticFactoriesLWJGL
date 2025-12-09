@@ -5,8 +5,6 @@ import dev.turtywurty.mysticfactories.util.registry.Registries;
 import dev.turtywurty.mysticfactories.util.registry.RegistryHolder;
 import dev.turtywurty.mysticfactories.world.tile.TileType;
 
-import java.util.function.Function;
-
 @RegistryHolder
 public class TileTypes {
     public static final TileType GRASS = register("grass", TileType.builder().build());

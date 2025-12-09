@@ -1,12 +1,9 @@
 package dev.turtywurty.mysticfactories.world.gen.impl;
 
-import dev.turtywurty.mysticfactories.init.TileTypes;
 import dev.turtywurty.mysticfactories.init.Biomes;
+import dev.turtywurty.mysticfactories.init.TileTypes;
 import dev.turtywurty.mysticfactories.world.Chunk;
 import dev.turtywurty.mysticfactories.world.WorldView;
-import dev.turtywurty.mysticfactories.world.biome.Biome;
-import dev.turtywurty.mysticfactories.world.biome.ClimateProfile;
-import dev.turtywurty.mysticfactories.world.biome.SurfaceProfile;
 import dev.turtywurty.mysticfactories.world.biome.source.BiomeSource;
 import dev.turtywurty.mysticfactories.world.biome.source.MultiNoiseBiomeSource;
 import dev.turtywurty.mysticfactories.world.gen.WorldGenerator;
@@ -18,8 +15,6 @@ import personthecat.fastnoise.data.FractalType;
 import personthecat.fastnoise.data.NoiseType;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.Random;
 
 public class OverworldWorldGenerator extends WorldGenerator {
     private final FastNoise noise;
@@ -28,6 +23,26 @@ public class OverworldWorldGenerator extends WorldGenerator {
         super(seedSource);
         this.biomeSource = createBiomeSource(this.seed);
         this.noise = createOverworldNoise(seed);
+    }
+
+    private static FastNoise createOverworldNoise(long seed) {
+        int intSeed = Long.hashCode(seed); // fold long seed into int
+        return FastNoise.builder()
+                .seed(intSeed)
+                .type(NoiseType.SIMPLEX2)
+                .fractal(FractalType.FBM)
+                .frequency(0.01f)
+                .octaves(4)
+                .build();
+    }
+
+    private static BiomeSource createBiomeSource(long seed) {
+        return new MultiNoiseBiomeSource(seed, List.of(
+                Biomes.OVERWORLD,
+                Biomes.OVERWORLD_HILLS,
+                Biomes.OVERWORLD_COAST,
+                Biomes.OCEAN
+        ));
     }
 
     @Override
@@ -52,25 +67,5 @@ public class OverworldWorldGenerator extends WorldGenerator {
                 }
             }
         }
-    }
-
-    private static FastNoise createOverworldNoise(long seed) {
-        int intSeed = Long.hashCode(seed); // fold long seed into int
-        return FastNoise.builder()
-                .seed(intSeed)
-                .type(NoiseType.SIMPLEX2)
-                .fractal(FractalType.FBM)
-                .frequency(0.01f)
-                .octaves(4)
-                .build();
-    }
-
-    private static BiomeSource createBiomeSource(long seed) {
-        return new MultiNoiseBiomeSource(seed, List.of(
-                Biomes.OVERWORLD,
-                Biomes.OVERWORLD_HILLS,
-                Biomes.OVERWORLD_COAST,
-                Biomes.OCEAN
-        ));
     }
 }

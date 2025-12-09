@@ -52,23 +52,6 @@ public record TileAtlas(int textureId, int width, int height, Map<Identifier, UV
         return new TileAtlas(textureId, atlasWidth, atlasHeight, uvMap);
     }
 
-    public UV getUv(TileType tileType) {
-        return this.uvMap.get(tileType.getId());
-    }
-
-    public void bind(int slot) {
-        GL13.glActiveTexture(GL13.GL_TEXTURE0 + slot);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.textureId);
-    }
-
-    public void unbind() {
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-    }
-
-    public void cleanup() {
-        GL11.glDeleteTextures(this.textureId);
-    }
-
     private static Map<Identifier, ImageData> loadImages() {
         Map<Identifier, ImageData> images = new LinkedHashMap<>();
         for (Identifier id : Registries.TILE_TYPES.getIds()) {
@@ -130,6 +113,23 @@ public record TileAtlas(int textureId, int width, int height, Map<Identifier, UV
 
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
         return textureId;
+    }
+
+    public UV getUv(TileType tileType) {
+        return this.uvMap.get(tileType.getId());
+    }
+
+    public void bind(int slot) {
+        GL13.glActiveTexture(GL13.GL_TEXTURE0 + slot);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.textureId);
+    }
+
+    public void unbind() {
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+    }
+
+    public void cleanup() {
+        GL11.glDeleteTextures(this.textureId);
     }
 
     public record UV(float u0, float v0, float u1, float v1) {

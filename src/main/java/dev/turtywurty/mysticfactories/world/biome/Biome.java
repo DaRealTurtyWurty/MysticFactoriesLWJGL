@@ -16,12 +16,12 @@ import java.util.List;
 @ToString
 @Getter
 public final class Biome implements Registerable {
-    @Setter
-    private Identifier id;
     private final ClimateProfile climateProfile;
     private final SurfaceProfile surfaceProfile;
     private final List<FeatureRule> featureRules;
     private final List<EntitySpawnRule> entitySpawnRules;
+    @Setter
+    private Identifier id;
 
     public Biome(Identifier id, ClimateProfile climateProfile, SurfaceProfile surfaceProfile, List<FeatureRule> featureRules,
                  List<EntitySpawnRule> entitySpawnRules) {
@@ -38,11 +38,10 @@ public final class Biome implements Registerable {
 
     public static class Builder {
         private final Identifier id;
-
-        private ClimateProfile climateProfile;
-        private SurfaceProfile surfaceProfile;
         private final List<FeatureRule> featureRules = new ArrayList<>();
         private final List<EntitySpawnRule> entitySpawnRules = new ArrayList<>();
+        private ClimateProfile climateProfile;
+        private SurfaceProfile surfaceProfile;
 
         public Builder(Identifier id) {
             this.id = id;

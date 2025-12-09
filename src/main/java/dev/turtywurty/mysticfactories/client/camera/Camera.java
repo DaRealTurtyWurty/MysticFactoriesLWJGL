@@ -11,9 +11,9 @@ public class Camera {
     private final Vector2f position;
     private final Matrix4f viewMatrix = new Matrix4f();
     private final Matrix4f projectionMatrix = new Matrix4f();
+    private final float orthoNear, orthoFar;
     @Setter
     private Entity followTarget;
-
     @Getter
     private float orthoLeft;
     @Getter
@@ -22,8 +22,6 @@ public class Camera {
     private float orthoBottom;
     @Getter
     private float orthoTop;
-    private final float orthoNear, orthoFar;
-
     @Setter
     private float targetWorldHeight;
     @Getter
@@ -80,13 +78,6 @@ public class Camera {
         }
     }
 
-    public enum CameraMovement {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT
-    }
-
     public void clearFollowTarget() {
         this.followTarget = null;
     }
@@ -96,5 +87,12 @@ public class Camera {
             var pos = this.followTarget.getPosition();
             this.position.set((float) pos.x, (float) pos.y);
         }
+    }
+
+    public enum CameraMovement {
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT
     }
 }

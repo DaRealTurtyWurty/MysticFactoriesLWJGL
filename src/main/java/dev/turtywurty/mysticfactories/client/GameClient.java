@@ -34,12 +34,15 @@ import org.joml.Vector2d;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Optional;
 
 public class GameClient implements Runnable {
     private static final int TARGET_UPS = 30;
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameClient.class);
 
     private final Window window;
     private final Thread gameThread;
@@ -74,7 +77,7 @@ public class GameClient implements Runnable {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         RegistryScanner.scanForRegistryHolders();
-        System.out.println("Registries scanned.");
+        LOGGER.info("Registries scanned.");
 
         var lifecycle = new RegistryLifecycle();
         lifecycle.add(RegistryKeys.TILE_TYPES);
@@ -132,7 +135,7 @@ public class GameClient implements Runnable {
             if (timer >= 1.0) {
                 this.fps = frames;
                 this.ups = ticks;
-                System.out.println("FPS: " + frames + " | UPS: " + ticks);
+                LOGGER.info("FPS: {} | UPS: {}", frames, ticks);
                 frames = 0;
                 ticks = 0;
                 timer -= 1.0;

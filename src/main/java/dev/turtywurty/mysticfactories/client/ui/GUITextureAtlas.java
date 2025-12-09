@@ -88,24 +88,6 @@ public record GUITextureAtlas(int textureId, int width, int height, Map<Identifi
         return new GUITextureAtlas(textureId, atlasWidth, atlasHeight, uvMap);
     }
 
-    public UV getUv(Identifier id) {
-        return this.uvMap.get(id);
-    }
-
-    public void bind(int slot) {
-        GL13.glActiveTexture(GL13.GL_TEXTURE0 + slot);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.textureId);
-    }
-
-    public void unbind() {
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-    }
-
-    public void cleanup() {
-        GL11.glDeleteTextures(this.textureId);
-        BUILT_MODID = null;
-    }
-
     private static Map<Identifier, ImageData> loadImages(String modid) {
         String basePath = "assets/" + modid + "/textures/gui";
         URL url = GUITextureAtlas.class.getClassLoader().getResource(basePath);
@@ -220,6 +202,24 @@ public record GUITextureAtlas(int textureId, int width, int height, Map<Identifi
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 
         return new GUITextureAtlas(textureId, 1, 1, Collections.emptyMap());
+    }
+
+    public UV getUv(Identifier id) {
+        return this.uvMap.get(id);
+    }
+
+    public void bind(int slot) {
+        GL13.glActiveTexture(GL13.GL_TEXTURE0 + slot);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.textureId);
+    }
+
+    public void unbind() {
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+    }
+
+    public void cleanup() {
+        GL11.glDeleteTextures(this.textureId);
+        BUILT_MODID = null;
     }
 
     public record UV(float u0, float v0, float u1, float v1) {

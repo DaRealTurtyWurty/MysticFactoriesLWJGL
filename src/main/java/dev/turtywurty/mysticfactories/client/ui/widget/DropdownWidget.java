@@ -24,14 +24,14 @@ public class DropdownWidget<T> extends Widget {
     private final int maxVisible;
     private final boolean scrollable;
     private final float optionHeight;
+    private final int backgroundColor;
+    private final int borderColor;
     private boolean open;
     private boolean openedThisFrame;
     private T selected;
     private Widget selectedView;
     private Widget optionsView;
     private boolean openAbove;
-    private final int backgroundColor;
-    private final int borderColor;
     private double lastMouseX;
     private double lastMouseY;
     private float lastScreenHeight;

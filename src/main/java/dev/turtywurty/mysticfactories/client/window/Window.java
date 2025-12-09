@@ -11,24 +11,25 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Window {
-    @Getter
-    private long id;
+    private static final Logger LOGGER = LoggerFactory.getLogger(Window.class);
     @Getter
     private final String title;
-    @Setter
-    private boolean resized;
-    private int framebufferWidth;
-    private int framebufferHeight;
-
-    private InputManager inputManager;
-
     private final Keyboard keyboardCallback;
     private final Mouse.MouseButtonCallback mouseButtonCallback;
     private final Mouse.CursorPosCallback cursorPosCallback;
     private final Mouse.ScrollCallback scrollCallback;
     private final GLFWWindowSizeCallback windowSizeCallback;
+    @Getter
+    private long id;
+    @Setter
+    private boolean resized;
+    private int framebufferWidth;
+    private int framebufferHeight;
+    private InputManager inputManager;
     private GLFWCharCallback charCallback;
 
     public Window(String title) {
@@ -51,8 +52,15 @@ public class Window {
         };
     }
 
+    public static long getCurrentWindowId() {
+        return GLFW.glfwGetCurrentContext();
+    }
+
     public void create() {
-        GLFWErrorCallback.createPrint(System.err).set();
+        GLFWErrorCallback.create((error, description) -> {
+            String message = GLFWErrorCallback.getDescription(description);
+            LOGGER.error("GLFW error {}: {}", error, message);
+        }).set();
 
         if (!GLFW.glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW!");
@@ -129,7 +137,6 @@ public class Window {
         return vidMode;
     }
 
-
     public void setVsync(boolean vsync) {
         Settings.getInstance().setVsync(vsync);
         GLFW.glfwSwapInterval(vsync ? 1 : 0);
@@ -192,10 +199,6 @@ public class Window {
         GLFW.glfwGetFramebufferSize(this.id, fbw, fbh);
         this.framebufferWidth = fbw[0];
         this.framebufferHeight = fbh[0];
-    }
-
-    public static long getCurrentWindowId() {
-        return GLFW.glfwGetCurrentContext();
     }
 
     public int getWidth() {

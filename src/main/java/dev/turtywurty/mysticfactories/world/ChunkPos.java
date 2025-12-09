@@ -15,17 +15,17 @@ public class ChunkPos extends Vector2i {
         super();
     }
 
+    public static ChunkPos fromTilePos(TilePos tilePos) {
+        int chunkX = Math.floorDiv(tilePos.x(), SIZE);
+        int chunkZ = Math.floorDiv(tilePos.y(), SIZE);
+        return new ChunkPos(chunkX, chunkZ);
+    }
+
     public int z() {
         return this.y;
     }
 
     public TilePos toTilePos(int localX, int localZ) {
         return new TilePos(this.x * SIZE + localX, z() * SIZE + localZ);
-    }
-
-    public static ChunkPos fromTilePos(TilePos tilePos) {
-        int chunkX = Math.floorDiv(tilePos.x(), SIZE);
-        int chunkZ = Math.floorDiv(tilePos.y(), SIZE);
-        return new ChunkPos(chunkX, chunkZ);
     }
 }

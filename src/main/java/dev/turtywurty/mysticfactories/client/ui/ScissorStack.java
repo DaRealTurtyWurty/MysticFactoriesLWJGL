@@ -6,12 +6,8 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class ScissorStack {
-    private record ScissorRect(int x, int y, int width, int height) {
-    }
-
     private final Deque<ScissorRect> stack = new ArrayDeque<>();
     private final DrawContext context;
-
     public ScissorStack(DrawContext context) {
         this.context = context;
     }
@@ -88,5 +84,8 @@ public class ScissorStack {
         } else {
             GL11.glDisable(GL11.GL_SCISSOR_TEST);
         }
+    }
+
+    private record ScissorRect(int x, int y, int width, int height) {
     }
 }

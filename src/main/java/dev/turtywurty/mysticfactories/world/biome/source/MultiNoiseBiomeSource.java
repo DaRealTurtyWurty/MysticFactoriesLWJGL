@@ -33,6 +33,35 @@ public class MultiNoiseBiomeSource extends BiomeSource {
         this.altitudeNoise = createNoise(noiseSeed + 2, 0.005f);
     }
 
+    private static float normalize(float value) {
+        return (value + 1.0f) * 0.5f;
+    }
+
+    private static float clamp01(float value) {
+        return Math.clamp(value, 0, 1);
+    }
+
+    private static FastNoise createNoise(int seed, float frequency) {
+        return FastNoise.builder()
+                .seed(seed)
+                .type(NoiseType.SIMPLEX2)
+                .fractal(FractalType.FBM)
+                .frequency(frequency)
+                .octaves(4)
+                .build();
+    }
+
+    private static float squaredDistance(
+            float sampleTemperature, float sampleHumidity, float sampleAltitude,
+            float targetTemperature, float targetHumidity, float targetAltitude) {
+        float temperatureDiff = sampleTemperature - targetTemperature;
+        float humidityDiff = sampleHumidity - targetHumidity;
+        float altitudeDiff = sampleAltitude - targetAltitude;
+        return temperatureDiff * temperatureDiff
+                + humidityDiff * humidityDiff
+                + altitudeDiff * altitudeDiff;
+    }
+
     @Override
     public Biome getBiome(int x, int z) {
         float temperatureSample = clamp01(normalize(this.temperatureNoise.getNoise(x, z)) * 0.9f);
@@ -65,40 +94,11 @@ public class MultiNoiseBiomeSource extends BiomeSource {
         return Objects.requireNonNullElse(closestBiome, this.biomes.getFirst());
     }
 
-    private static float normalize(float value) {
-        return (value + 1.0f) * 0.5f;
-    }
-
-    private static float clamp01(float value) {
-        return Math.clamp(value, 0, 1);
-    }
-
-    private static FastNoise createNoise(int seed, float frequency) {
-        return FastNoise.builder()
-                .seed(seed)
-                .type(NoiseType.SIMPLEX2)
-                .fractal(FractalType.FBM)
-                .frequency(frequency)
-                .octaves(4)
-                .build();
-    }
-
     private float sampleAltitude(FloatProvider provider, int x, int z) {
         if (provider == null)
             return 0.0f;
 
         long mixedSeed = this.seed ^ (long) x * X_PRIME ^ (long) z * Z_PRIME;
         return provider.get(new Random(mixedSeed));
-    }
-
-    private static float squaredDistance(
-            float sampleTemperature, float sampleHumidity, float sampleAltitude,
-            float targetTemperature, float targetHumidity, float targetAltitude) {
-        float temperatureDiff = sampleTemperature - targetTemperature;
-        float humidityDiff = sampleHumidity - targetHumidity;
-        float altitudeDiff = sampleAltitude - targetAltitude;
-        return temperatureDiff * temperatureDiff
-                + humidityDiff * humidityDiff
-                + altitudeDiff * altitudeDiff;
     }
 }

@@ -19,6 +19,13 @@ public class Tab {
     }
 
     /**
+     * Builder for convenience when constructing tab panes.
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
      * Sets the label for this tab.
      */
     public Tab setTitle(String title) {
@@ -32,13 +39,6 @@ public class Tab {
     public Tab setContent(Widget content) {
         this.content = Objects.requireNonNull(content, "content");
         return this;
-    }
-
-    /**
-     * Builder for convenience when constructing tab panes.
-     */
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static final class Builder {

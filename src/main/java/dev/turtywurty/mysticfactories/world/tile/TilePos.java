@@ -16,6 +16,16 @@ public class TilePos extends Vector2i {
         super();
     }
 
+    public static TilePos fromVector2i(Vector2i vec) {
+        return new TilePos(vec.x, vec.y);
+    }
+
+    public static TilePos fromLong(long packed) {
+        int x = (int) (packed & 0xFFFFFFFFL);
+        int y = (int) ((packed >> 32) & 0xFFFFFFFFL);
+        return new TilePos(x, y);
+    }
+
     public TilePos add(TilePos other) {
         return new TilePos(this.x + other.x, this.y + other.y);
     }
@@ -36,22 +46,12 @@ public class TilePos extends Vector2i {
         return new TilePos(this.x, this.y);
     }
 
-    public static TilePos fromVector2i(Vector2i vec) {
-        return new TilePos(vec.x, vec.y);
-    }
-
     public ChunkPos toChunkPos() {
         return new ChunkPos(Math.floorDiv(this.x, ChunkPos.SIZE), Math.floorDiv(this.y, ChunkPos.SIZE));
     }
 
     public long toLong() {
         return (((long) this.x) & 0xFFFFFFFFL) | ((((long) this.y & 0xFFFFFFFFL) << 32));
-    }
-
-    public static TilePos fromLong(long packed) {
-        int x = (int) (packed & 0xFFFFFFFFL);
-        int y = (int) ((packed >> 32) & 0xFFFFFFFFL);
-        return new TilePos(x, y);
     }
 
     public TilePos offset(Direction direction) {

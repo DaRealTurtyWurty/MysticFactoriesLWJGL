@@ -3,8 +3,6 @@ package dev.turtywurty.mysticfactories.world.biome;
 import java.util.Random;
 
 public abstract class IntProvider {
-    public abstract int get(Random random);
-
     public static IntProvider constant(int value) {
         return new IntProvider() {
             @Override
@@ -79,4 +77,6 @@ public abstract class IntProvider {
             }
         };
     }
+
+    public abstract int get(Random random);
 }

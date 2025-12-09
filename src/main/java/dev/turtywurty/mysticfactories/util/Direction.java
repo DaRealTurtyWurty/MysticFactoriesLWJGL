@@ -23,6 +23,18 @@ public enum Direction {
         return directions[random.nextInt(directions.length)];
     }
 
+    public static Direction fromAngleDegrees(float angle) {
+        float normalizedAngle = ((angle % 360) + 360) % 360;
+        if (normalizedAngle >= 315 || normalizedAngle < 45) return NORTH;
+        if (normalizedAngle >= 45 && normalizedAngle < 135) return EAST;
+        if (normalizedAngle >= 135 && normalizedAngle < 225) return SOUTH;
+        return WEST;
+    }
+
+    public static Direction fromAngleRadians(float angle) {
+        return fromAngleDegrees((float) Math.toDegrees(angle));
+    }
+
     public Direction opposite() {
         return switch (this) {
             case NORTH -> SOUTH;
@@ -108,17 +120,5 @@ public enum Direction {
 
     public float toAngleRadians() {
         return (float) Math.toRadians(toAngleDegrees());
-    }
-
-    public static Direction fromAngleDegrees(float angle) {
-        float normalizedAngle = ((angle % 360) + 360) % 360;
-        if (normalizedAngle >= 315 || normalizedAngle < 45) return NORTH;
-        if (normalizedAngle >= 45 && normalizedAngle < 135) return EAST;
-        if (normalizedAngle >= 135 && normalizedAngle < 225) return SOUTH;
-        return WEST;
-    }
-
-    public static Direction fromAngleRadians(float angle) {
-        return fromAngleDegrees((float) Math.toDegrees(angle));
     }
 }

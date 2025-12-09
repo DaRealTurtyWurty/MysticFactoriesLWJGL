@@ -7,12 +7,12 @@ public record VisualProfile(int fogColor, int waterColor, int foliageColor,
                             List<AmbientParticleSettings> ambientParticles, List<AmbientSoundSettings> ambientSounds,
                             List<MusicTrack> musicTracks) {
     public static class Builder {
-        private int fogColor = 0xC0D8FF;
-        private int waterColor = 0x3F76E4;
-        private int foliageColor = 0x4C9A2A;
         private final List<AmbientParticleSettings> ambientParticles = new ArrayList<>();
         private final List<AmbientSoundSettings> ambientSounds = new ArrayList<>();
         private final List<MusicTrack> musicTracks = new ArrayList<>();
+        private int fogColor = 0xC0D8FF;
+        private int waterColor = 0x3F76E4;
+        private int foliageColor = 0x4C9A2A;
 
         public Builder fogColor(int fogColor) {
             this.fogColor = fogColor;

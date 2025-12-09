@@ -15,9 +15,9 @@ import java.util.function.Supplier;
 @ToString
 @Getter
 public class WorldType implements Registerable {
+    private final Supplier<WorldGenerator> generator;
     @Setter
     private Identifier id;
-    private final Supplier<WorldGenerator> generator;
 
     public WorldType(Supplier<WorldGenerator> generator) {
         if (generator == null)

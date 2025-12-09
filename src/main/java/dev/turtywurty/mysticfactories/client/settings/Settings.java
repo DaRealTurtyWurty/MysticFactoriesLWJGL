@@ -31,15 +31,6 @@ public class Settings {
         return INSTANCE;
     }
 
-    public void save() {
-        try {
-            Files.createDirectories(SETTINGS_PATH.getParent());
-            writeJson(SETTINGS_PATH);
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
-    }
-
     private static Settings load() {
         if (Files.exists(SETTINGS_PATH)) {
             try {
@@ -54,6 +45,30 @@ public class Settings {
         var defaults = new Settings();
         defaults.save();
         return defaults;
+    }
+
+    private static Path getSettingsPath() {
+        String os = System.getProperty("os.name").toLowerCase();
+        Path settingsDir;
+
+        if (os.contains("win")) {
+            settingsDir = Paths.get(System.getenv("APPDATA"), "MysticFactories");
+        } else if (os.contains("mac")) {
+            settingsDir = Paths.get(System.getProperty("user.home"), "Library", "Application Support", "MysticFactories");
+        } else {
+            settingsDir = Paths.get(System.getProperty("user.home"), ".config", "MysticFactories");
+        }
+
+        return settingsDir.resolve("settings.json");
+    }
+
+    public void save() {
+        try {
+            Files.createDirectories(SETTINGS_PATH.getParent());
+            writeJson(SETTINGS_PATH);
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
     public void writeJson(Path path) throws IOException {
@@ -78,42 +93,19 @@ public class Settings {
         this.fpsCap.set(GsonReader.readIntSafe(data, "FpsCap", 60));
     }
 
-    private static Path getSettingsPath() {
-        String os = System.getProperty("os.name").toLowerCase();
-        Path settingsDir;
-
-        if (os.contains("win")) {
-            settingsDir = Paths.get(System.getenv("APPDATA"), "MysticFactories");
-        } else if (os.contains("mac")) {
-            settingsDir = Paths.get(System.getProperty("user.home"), "Library", "Application Support", "MysticFactories");
-        } else {
-            settingsDir = Paths.get(System.getProperty("user.home"), ".config", "MysticFactories");
-        }
-
-        return settingsDir.resolve("settings.json");
-    }
-
     public int getWindowWidth() {
         ResolutionPreset preset = this.resolutionPreset.get();
         return preset != null ? preset.getWidth() : this.windowWidth.get();
     }
 
-    public int getWindowHeight() {
-        ResolutionPreset preset = this.resolutionPreset.get();
-        return preset != null ? preset.getHeight() : this.windowHeight.get();
-    }
-
-    public void setResolutionPreset(ResolutionPreset preset) {
-        this.resolutionPreset.set(preset);
-        if (preset != null) {
-            this.windowWidth.set(preset.getWidth());
-            this.windowHeight.set(preset.getHeight());
-        }
-    }
-
     public void setWindowWidth(int width) {
         this.windowWidth.set(width);
         this.resolutionPreset.set(null);
+    }
+
+    public int getWindowHeight() {
+        ResolutionPreset preset = this.resolutionPreset.get();
+        return preset != null ? preset.getHeight() : this.windowHeight.get();
     }
 
     public void setWindowHeight(int height) {
@@ -135,6 +127,14 @@ public class Settings {
 
     public ResolutionPreset getResolutionPreset() {
         return this.resolutionPreset.get();
+    }
+
+    public void setResolutionPreset(ResolutionPreset preset) {
+        this.resolutionPreset.set(preset);
+        if (preset != null) {
+            this.windowWidth.set(preset.getWidth());
+            this.windowHeight.set(preset.getHeight());
+        }
     }
 
     public ObservableProperty<ResolutionPreset> resolutionPresetProperty() {

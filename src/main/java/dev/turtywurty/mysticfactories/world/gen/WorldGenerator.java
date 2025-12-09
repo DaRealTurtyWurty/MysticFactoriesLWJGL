@@ -16,10 +16,10 @@ import lombok.ToString;
 @ToString
 @Getter
 public abstract class WorldGenerator implements Registerable {
-    @Setter
-    protected Identifier id;
     protected final SeedSource seedSource;
     protected final long seed;
+    @Setter
+    protected Identifier id;
     protected BiomeSource biomeSource;
 
     public WorldGenerator(SeedSource seedSource) {

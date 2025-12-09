@@ -5,6 +5,8 @@ import dev.turtywurty.mysticfactories.world.Chunk;
 import dev.turtywurty.mysticfactories.world.ChunkPos;
 import dev.turtywurty.mysticfactories.world.World;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -17,13 +19,15 @@ import java.util.*;
 import java.util.List;
 
 public final class BiomeMapExporter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BiomeMapExporter.class);
+
     private BiomeMapExporter() {
     }
 
     public static void export(World world, Path outputPath) {
         Map<ChunkPos, Chunk> chunks = world.getChunks();
         if (chunks.isEmpty()) {
-            System.out.println("Biome map export skipped: no chunks have been generated.");
+            LOGGER.info("Biome map export skipped: no chunks have been generated.");
             return;
         }
 
@@ -73,9 +77,9 @@ public final class BiomeMapExporter {
 
             ImageIO.write(image, "png", outputPath.toFile());
             writeLegend(outputPath, palette);
-            System.out.println("Exported biome map to: " + outputPath.toAbsolutePath());
+            LOGGER.info("Exported biome map to: {}", outputPath.toAbsolutePath());
         } catch (IOException ioException) {
-            System.err.println("Failed to export biome map: " + ioException.getMessage());
+            LOGGER.error("Failed to export biome map", ioException);
         }
     }
 

@@ -47,6 +47,10 @@ public class ScrollList extends Widget {
         updateLayout();
     }
 
+    public List<Widget> getChildren() {
+        return Collections.unmodifiableList(this.children);
+    }
+
     public void setChildren(Collection<Widget> newChildren) {
         this.children.clear();
         if (newChildren != null) {
@@ -54,10 +58,6 @@ public class ScrollList extends Widget {
         }
 
         updateLayout();
-    }
-
-    public List<Widget> getChildren() {
-        return Collections.unmodifiableList(this.children);
     }
 
     public void setSpacing(float spacing) {
@@ -340,6 +340,7 @@ public class ScrollList extends Widget {
     }
 
     public static class Builder {
+        private final List<Widget> children = new ArrayList<>();
         private float x;
         private float y;
         private float width;
@@ -348,7 +349,6 @@ public class ScrollList extends Widget {
         private float scrollSpeed = 16f;
         private float barWidth = 10f;
         private boolean showScrollBar = true;
-        private final List<Widget> children = new ArrayList<>();
 
         public Builder position(float x, float y) {
             this.x = x;

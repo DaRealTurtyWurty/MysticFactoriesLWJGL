@@ -89,10 +89,6 @@ public class WidgetList extends Widget {
         return Collections.unmodifiableList(children);
     }
 
-    public int getChildCount() {
-        return children.size();
-    }
-
     /**
      * Replaces children with the provided collection.
      */
@@ -110,6 +106,10 @@ public class WidgetList extends Widget {
      */
     public void setChildren(Widget... newChildren) {
         setChildren(List.of(newChildren));
+    }
+
+    public int getChildCount() {
+        return children.size();
     }
 
     /**
@@ -328,13 +328,13 @@ public class WidgetList extends Widget {
     }
 
     public static class Builder {
+        private final List<Widget> children = new ArrayList<>();
         private float x;
         private float y;
         private float width;
         private float height;
         private float spacing = 0;
         private Orientation orientation = Orientation.VERTICAL;
-        private final List<Widget> children = new ArrayList<>();
 
         /**
          * Top-left position in screen space.

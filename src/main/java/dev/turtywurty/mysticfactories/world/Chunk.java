@@ -1,8 +1,8 @@
 package dev.turtywurty.mysticfactories.world;
 
+import dev.turtywurty.mysticfactories.world.biome.Biome;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
 import dev.turtywurty.mysticfactories.world.tile.TileType;
-import dev.turtywurty.mysticfactories.world.biome.Biome;
 import lombok.Getter;
 
 import java.util.HashMap;

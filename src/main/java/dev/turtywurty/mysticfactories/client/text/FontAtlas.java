@@ -15,9 +15,8 @@ import java.nio.IntBuffer;
 
 @Getter
 public class FontAtlas {
-    private static final int FIRST_CHAR = 32; // Space character
     public static final int CHAR_COUNT = 95; // From space (32) to tilde (126) - inclusive
-
+    private static final int FIRST_CHAR = 32; // Space character
     private final Glyph[] glyphs = new Glyph[CHAR_COUNT]; // Array of glyphs indexed by (codepoint - FIRST_CHAR)
     private final ByteBuffer fontData; // Keep the font buffer alive for stb
     private final int textureId; // OpenGL texture ID for the font atlas

@@ -50,6 +50,10 @@ public class SliderWidget extends Widget {
         return new Builder();
     }
 
+    private static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
     @Override
     public void render(DrawContext context) {
         if (!isVisible())
@@ -154,10 +158,6 @@ public class SliderWidget extends Widget {
 
         float fraction = (this.value - this.min) / (this.max - this.min);
         return getX() + fraction * getWidth();
-    }
-
-    private static float clamp(float value, float min, float max) {
-        return Math.max(min, Math.min(max, value));
     }
 
     public static class Builder {

@@ -11,9 +11,9 @@ import lombok.ToString;
 @ToString
 @Getter
 public class TileType implements Registerable {
+    private final boolean solid;
     @Setter
     private Identifier id;
-    private final boolean solid;
 
     public TileType(boolean solid) {
         this.solid = solid;

@@ -22,12 +22,12 @@ public class WorldGeneratorType implements Registerable {
         this.factory = factory;
     }
 
-    public WorldGenerator createGenerator() {
-        return this.factory.create();
-    }
-
     public static Builder builder() {
         return new Builder();
+    }
+
+    public WorldGenerator createGenerator() {
+        return this.factory.create();
     }
 
     public static class Builder {

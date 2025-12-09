@@ -10,10 +10,10 @@ public record EntitySpawnRule(EntityType<?> entityType, IntProvider groupSize, f
                               SpawnCategory spawnCategory, List<SpawnCondition> spawnConditions) {
     public static class Builder {
         private final EntityType<?> entityType;
+        private final List<SpawnCondition> spawnConditions = new ArrayList<>();
         private IntProvider groupSize = IntProvider.constant(1);
         private float spawnProbability = 1.0f;
         private SpawnCategory spawnCategory = SpawnCategory.CREATURE;
-        private final List<SpawnCondition> spawnConditions = new ArrayList<>();
 
         public Builder(EntityType<?> entityType) {
             this.entityType = entityType;
