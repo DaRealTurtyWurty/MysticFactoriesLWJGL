@@ -3,6 +3,12 @@ plugins {
     id 'application'
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 ext {
     lwjglVersion = '3.3.6'
 }

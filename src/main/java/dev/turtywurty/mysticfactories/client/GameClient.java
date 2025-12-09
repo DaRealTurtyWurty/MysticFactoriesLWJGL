@@ -9,10 +9,12 @@ import dev.turtywurty.mysticfactories.client.render.world.entity.BasicEntityRend
 import dev.turtywurty.mysticfactories.client.render.world.entity.EntityRendererRegistry;
 import dev.turtywurty.mysticfactories.client.settings.Settings;
 import dev.turtywurty.mysticfactories.client.text.Fonts;
+import dev.turtywurty.mysticfactories.client.ui.GUI;
 import dev.turtywurty.mysticfactories.client.ui.GUIStack;
 import dev.turtywurty.mysticfactories.client.ui.HUDManager;
 import dev.turtywurty.mysticfactories.client.ui.MainMenuGUI;
 import dev.turtywurty.mysticfactories.client.ui.SettingsGUI;
+import dev.turtywurty.mysticfactories.client.ui.impl.LoadingWorldGUI;
 import dev.turtywurty.mysticfactories.client.ui.widget.TextLabel;
 import dev.turtywurty.mysticfactories.client.window.Window;
 import dev.turtywurty.mysticfactories.client.world.ClientWorld;
@@ -39,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class GameClient implements Runnable {
     private static final int TARGET_UPS = 30;
@@ -53,6 +56,11 @@ public class GameClient implements Runnable {
     private @Nullable IntegratedServer integratedServer; // null when connected to remote
     private ClientWorld clientWorld;
     private WorldRenderer worldRenderer;
+    private boolean loadingWorld;
+    private boolean loadingScreenShown;
+    private LoadingWorldGUI loadingScreen;
+    private final AtomicReference<WorldLoadResult> pendingWorldLoad = new AtomicReference<>();
+    private final AtomicReference<Throwable> pendingWorldLoadError = new AtomicReference<>();
     private int fps, ups;
 
     public GameClient() {
@@ -179,6 +187,8 @@ public class GameClient implements Runnable {
     }
 
     private void update(double deltaTime) {
+        handleWorldLoading();
+
         boolean pauseIntegrated = this.integratedServer != null && GUIStack.shouldPauseGame();
         if (this.integratedServer != null && !pauseIntegrated) {
             this.integratedServer.tick(deltaTime);
@@ -213,28 +223,36 @@ public class GameClient implements Runnable {
         this.window.destroy();
     }
 
-    private void startGameWorld() {
-        if (this.clientWorld != null)
+    private void handleWorldLoading() {
+        if (!this.loadingWorld)
             return;
 
+        Throwable error = this.pendingWorldLoadError.getAndSet(null);
+        if (error != null) {
+            LOGGER.error("Failed to load world!", error);
+            removeLoadingScreen();
+            this.loadingWorld = false;
+            return;
+        }
+
+        WorldLoadResult result = this.pendingWorldLoad.getAndSet(null);
+        if (result == null)
+            return;
+
+        completeWorldLoad(result);
+        updateLoadingScreen(1.0f, "Starting world...");
+        removeLoadingScreen();
+        removeMainMenuIfTop();
+        this.loadingWorld = false;
+    }
+
+    private void completeWorldLoad(WorldLoadResult result) {
         var entityRendererRegistry = new EntityRendererRegistry();
         entityRendererRegistry.registerRenderer(EntityTypes.PLAYER, new BasicEntityRenderer<>(EntityTypes.PLAYER.getId(), 16.0f));
         this.worldRenderer = new WorldRenderer(entityRendererRegistry);
 
-        // Integrated server for singleplayer
-        this.integratedServer = new IntegratedServer();
-        var overworld = new ServerWorld(WorldTypes.OVERWORLD);
-        for (int chunkX = -10; chunkX <= 10; chunkX++) {
-            for (int chunkY = -10; chunkY <= 10; chunkY++) {
-                overworld.addChunk(new ChunkPos(chunkX, chunkY));
-            }
-        }
-
-        Path biomeMapPath = Path.of("build", "biome_map.png");
-        BiomeMapExporter.export(overworld, biomeMapPath);
-
-        this.integratedServer.addWorld(overworld);
-
+        this.integratedServer = result.integratedServer();
+        var overworld = result.overworld();
         this.clientWorld = new ClientWorld(WorldTypes.OVERWORLD, overworld.getWorldData().getSeed());
 
         // Local world connection forwards updates to the client
@@ -285,8 +303,83 @@ public class GameClient implements Runnable {
                         .textSupplier(() -> "FPS: %d, UPS: %d".formatted(this.fps, this.ups))
                         .position(8, 48)
                         .build());
+    }
 
-        GUIStack.pop();
+    private void updateLoadingScreen(float progress, String status) {
+        LoadingWorldGUI screen = this.loadingScreen;
+        if (screen == null)
+            return;
+
+        screen.setProgress(progress);
+        screen.setStatus(status);
+    }
+
+    private void removeLoadingScreen() {
+        if (!this.loadingScreenShown)
+            return;
+
+        GUI top = GUIStack.peek();
+        if (top instanceof LoadingWorldGUI) {
+            GUIStack.pop();
+        }
+
+        this.loadingScreenShown = false;
+        this.loadingScreen = null;
+    }
+
+    private void removeMainMenuIfTop() {
+        GUI top = GUIStack.peek();
+        if (top instanceof MainMenuGUI) {
+            GUIStack.pop();
+        }
+    }
+
+    private void startGameWorld() {
+        if (this.clientWorld != null || this.loadingWorld)
+            return;
+
+        this.loadingWorld = true;
+        this.pendingWorldLoad.set(null);
+        this.pendingWorldLoadError.set(null);
+
+        if (!this.loadingScreenShown) {
+            this.loadingScreen = new LoadingWorldGUI();
+            this.loadingScreen.setProgress(0f);
+            this.loadingScreen.setStatus("Preparing world...");
+            GUIStack.push(this.loadingScreen);
+            this.loadingScreenShown = true;
+        }
+
+        Thread worldLoader = new Thread(() -> {
+            try {
+                updateLoadingScreen(0.05f, "Generating chunks...");
+                var integratedServer = new IntegratedServer();
+                var overworld = new ServerWorld(WorldTypes.OVERWORLD);
+                int totalChunks = 101 * 101;
+                int chunksGenerated = 0;
+                for (int chunkX = -50; chunkX <= 50; chunkX++) {
+                    for (int chunkY = -50; chunkY <= 50; chunkY++) {
+                        overworld.addChunk(new ChunkPos(chunkX, chunkY));
+                        chunksGenerated++;
+                        float progress = 0.05f + 0.6f * (chunksGenerated / (float) totalChunks);
+                        updateLoadingScreen(progress, "Generating chunks...");
+                    }
+                }
+
+                updateLoadingScreen(0.7f, "Exporting biome map...");
+                Path biomeMapPath = Path.of("build", "biome_map.png");
+                BiomeMapExporter.export(overworld, biomeMapPath);
+
+                updateLoadingScreen(0.9f, "Finishing up...");
+                integratedServer.addWorld(overworld);
+                this.pendingWorldLoad.set(new WorldLoadResult(integratedServer, overworld));
+                updateLoadingScreen(1.0f, "Starting world...");
+            } catch (Throwable throwable) {
+                this.pendingWorldLoadError.set(throwable);
+                updateLoadingScreen(0f, "Failed to load world");
+            }
+        }, "world-loader");
+        worldLoader.start();
     }
 
     private void openSettings() {
@@ -295,5 +388,8 @@ public class GameClient implements Runnable {
             GUIStack.pop();
             GUIStack.push(new MainMenuGUI(this::startGameWorld, this::openSettings));
         }));
+    }
+
+    private record WorldLoadResult(IntegratedServer integratedServer, ServerWorld overworld) {
     }
 }

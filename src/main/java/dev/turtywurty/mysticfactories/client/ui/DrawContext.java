@@ -174,6 +174,19 @@ public class DrawContext {
     }
 
     /**
+     * Draw a solid rectangle centered on the given point using an ARGB int.
+     *
+     * @param centerX center x in screen space
+     * @param centerY center y in screen space
+     * @param width   width in pixels
+     * @param height  height in pixels
+     * @param color   ARGB color (0xAARRGGBB)
+     */
+    public void drawCenteredRect(float centerX, float centerY, float width, float height, int color) {
+        drawRect(centerX - width * 0.5f, centerY - height * 0.5f, width, height, color);
+    }
+
+    /**
      * Draw a solid-color rectangle using an ARGB int.
      *
      * @param x      top-left x in screen space
@@ -314,6 +327,21 @@ public class DrawContext {
      */
     public void drawText(FontAtlas font, String text, float x, float y) {
         drawText(font, text, x, y, 0xFFFFFFFF);
+    }
+
+    /**
+     * Draw centered text at the specified screen position.
+     *
+     * @param font    font atlas to use
+     * @param text    string to render
+     * @param centerX center x in screen space
+     * @param y       baseline y in screen space
+     * @param color   ARGB color (0xAARRGGBB)
+     */
+    public void drawCenteredText(FontAtlas font, String text, float centerX, float y, int color) {
+        float textWidth = font.measureTextWidth(text);
+        float startX = centerX - textWidth * 0.5f;
+        drawText(font, text, startX, y, color);
     }
 
     /**
