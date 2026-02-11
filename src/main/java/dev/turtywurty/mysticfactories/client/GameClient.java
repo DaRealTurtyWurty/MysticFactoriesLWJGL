@@ -290,7 +290,10 @@ public class GameClient implements Runnable {
                                 return "Biome: unknown";
 
                             Vector2d pos = localPlayerOpt.get().getPosition();
-                            var tilePos = new TilePos((int) Math.floor(pos.x), (int) Math.floor(pos.y));
+                            float tileSize = this.clientWorld.getTileSize();
+                            var tilePos = new TilePos(
+                                    (int) Math.floor(pos.x / tileSize),
+                                    (int) Math.floor(pos.y / tileSize));
                             return this.clientWorld.getBiome(tilePos)
                                     .map(biome -> "Biome: " + biome.getId())
                                     .orElse("Biome: unknown");

@@ -1,15 +1,17 @@
 package dev.turtywurty.mysticfactories.world.gen.impl;
 
 import dev.turtywurty.mysticfactories.init.Biomes;
-import dev.turtywurty.mysticfactories.init.TileTypes;
 import dev.turtywurty.mysticfactories.world.Chunk;
 import dev.turtywurty.mysticfactories.world.WorldView;
+import dev.turtywurty.mysticfactories.world.biome.Biome;
 import dev.turtywurty.mysticfactories.world.biome.source.BiomeSource;
 import dev.turtywurty.mysticfactories.world.biome.source.MultiNoiseBiomeSource;
+import dev.turtywurty.mysticfactories.world.biome.surface.SurfaceContext;
+import dev.turtywurty.mysticfactories.world.biome.surface.SurfaceProfile;
+import dev.turtywurty.mysticfactories.world.biome.surface.SurfaceRule;
 import dev.turtywurty.mysticfactories.world.gen.WorldGenerator;
 import dev.turtywurty.mysticfactories.world.seed.SeedSource;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
-import dev.turtywurty.mysticfactories.world.tile.TileType;
 import personthecat.fastnoise.FastNoise;
 import personthecat.fastnoise.data.FractalType;
 import personthecat.fastnoise.data.NoiseType;
@@ -54,18 +56,35 @@ public class OverworldWorldGenerator extends WorldGenerator {
                         chunk.getPos().y * Chunk.SIZE + z
                 );
 
-                TileType grass = TileTypes.GRASS;
-                TileType water = TileTypes.WATER;
-                TileType sand = TileTypes.SAND;
                 float noiseValue = this.noise.getNoise(pos.x, pos.y);
-                if (noiseValue < -0.2f) {
-                    chunk.setTile(pos, water);
-                } else if (noiseValue < 0.0f) {
-                    chunk.setTile(pos, sand);
+                Biome biome = this.biomeSource.getBiome(pos.x(), pos.y(), noiseValue);
+                SurfaceProfile surfaceProfile = biome.getSurfaceProfile();
+                var ctx = new SurfaceContext(noiseValue, pos.x(), pos.y());
+
+                boolean matchedRule = false;
+                for (SurfaceRule surfaceRule : surfaceProfile.surfaceRules()) {
+                    if (surfaceRule.matches(ctx)) {
+                        chunk.setTile(pos, surfaceRule.resultTile(), biome);
+                        matchedRule = true;
+                        break;
+                    }
+                }
+
+                if(matchedRule)
+                    continue;
+
+                if (surfaceProfile.primaryFluid() != null && noiseValue < 0.0f) {
+                    chunk.setTile(pos, surfaceProfile.primaryFluid(), biome);
                 } else {
-                    chunk.setTile(pos, grass);
+                    chunk.setTile(pos, surfaceProfile.primarySurface(), biome);
                 }
             }
         }
+    }
+
+    @Override
+    public Biome getBiome(int x, int z) {
+        float noiseValue = this.noise.getNoise(x, z);
+        return this.biomeSource.getBiome(x, z, noiseValue);
     }
 }

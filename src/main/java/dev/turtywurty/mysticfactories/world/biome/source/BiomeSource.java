@@ -13,5 +13,9 @@ public abstract class BiomeSource {
         return this.seed;
     }
 
+    public Biome getBiome(int x, int z, float terrainNoise) {
+        return getBiome(x, z);
+    }
+
     public abstract Biome getBiome(int x, int z);
 }

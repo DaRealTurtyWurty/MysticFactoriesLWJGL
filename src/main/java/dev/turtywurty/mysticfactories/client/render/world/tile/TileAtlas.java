@@ -44,7 +44,7 @@ public record TileAtlas(int textureId, int width, int height, Map<Identifier, UV
             uvMap.put(id, new UV(u0, v0, u1, v1));
 
             currentY += image.height;
-            STBImage.stbi_image_free(image.pixels);
+            image.free();
         }
 
         atlasBuffer.flip();
@@ -59,7 +59,8 @@ public record TileAtlas(int textureId, int width, int height, Map<Identifier, UV
             try {
                 images.put(id, loadImage(path));
             } catch (IOException exception) {
-                throw new IllegalStateException("Failed to load tile texture: " + path, exception);
+                System.err.println("Failed to load tile texture for " + id + ": " + exception.getMessage());
+                images.put(id, ImageData.MISSING);
             }
         }
 
@@ -86,7 +87,7 @@ public record TileAtlas(int textureId, int width, int height, Map<Identifier, UV
         if (pixels == null)
             throw new IOException("Failed to decode image " + resourcePath + ": " + STBImage.stbi_failure_reason());
 
-        return new ImageData(w.get(0), h.get(0), pixels);
+        return new ImageData(w.get(0), h.get(0), pixels, true);
     }
 
     private static void copyIntoAtlas(ImageData image, ByteBuffer atlas, int atlasWidth, int destY) {
@@ -135,6 +136,30 @@ public record TileAtlas(int textureId, int width, int height, Map<Identifier, UV
     public record UV(float u0, float v0, float u1, float v1) {
     }
 
-    private record ImageData(int width, int height, ByteBuffer pixels) {
+    public record ImageData(int width, int height, ByteBuffer pixels, boolean stbAllocated) {
+        public static final ImageData MISSING = createMissing(16, 16);
+
+        public static ImageData createMissing(int width, int height) {
+            // checkered magenta and black pattern for missing texture
+            ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4);
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    boolean isMagenta = ((x / 8) + (y / 8)) % 2 == 0;
+                    buffer.put(isMagenta ? (byte) 255 : (byte) 0); // R
+                    buffer.put((byte) 0); // G
+                    buffer.put(isMagenta ? (byte) 255 : (byte) 0); // B
+                    buffer.put((byte) 255); // A
+                }
+            }
+
+            buffer.flip();
+            return new ImageData(width, height, buffer, false);
+        }
+
+        public void free() {
+            if (this.stbAllocated) {
+                STBImage.stbi_image_free(this.pixels);
+            }
+        }
     }
 }

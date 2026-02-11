@@ -4,6 +4,7 @@ import dev.turtywurty.mysticfactories.util.Identifier;
 import dev.turtywurty.mysticfactories.util.registry.Registerable;
 import dev.turtywurty.mysticfactories.world.biome.feature.FeatureRule;
 import dev.turtywurty.mysticfactories.world.biome.spawning.EntitySpawnRule;
+import dev.turtywurty.mysticfactories.world.biome.surface.SurfaceProfile;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

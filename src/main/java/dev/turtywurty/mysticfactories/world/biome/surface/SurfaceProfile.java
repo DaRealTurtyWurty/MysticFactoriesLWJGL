@@ -1,25 +1,18 @@
-package dev.turtywurty.mysticfactories.world.biome;
+package dev.turtywurty.mysticfactories.world.biome.surface;
 
 import dev.turtywurty.mysticfactories.world.tile.TileType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public record SurfaceProfile(TileType primarySurface, TileType secondarySurface, TileType primaryFluid,
-                             List<SurfaceRule> surfaceRules) {
+public record SurfaceProfile(TileType primarySurface, TileType primaryFluid, List<SurfaceRule> surfaceRules) {
     public static class Builder {
         private final List<SurfaceRule> surfaceRules = new ArrayList<>();
         private TileType primarySurface;
-        private TileType secondarySurface;
         private TileType primaryFluid;
 
         public Builder primarySurface(TileType primarySurface) {
             this.primarySurface = primarySurface;
-            return this;
-        }
-
-        public Builder secondarySurface(TileType secondarySurface) {
-            this.secondarySurface = secondarySurface;
             return this;
         }
 
@@ -34,7 +27,7 @@ public record SurfaceProfile(TileType primarySurface, TileType secondarySurface,
         }
 
         public SurfaceProfile build() {
-            return new SurfaceProfile(primarySurface, secondarySurface, primaryFluid, surfaceRules);
+            return new SurfaceProfile(primarySurface, primaryFluid, surfaceRules);
         }
     }
 }
