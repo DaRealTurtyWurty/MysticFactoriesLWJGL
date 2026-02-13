@@ -4,7 +4,6 @@ import dev.turtywurty.mysticfactories.init.Biomes;
 import dev.turtywurty.mysticfactories.util.registry.Registries;
 import dev.turtywurty.mysticfactories.world.Chunk;
 import dev.turtywurty.mysticfactories.world.World;
-import dev.turtywurty.mysticfactories.world.WorldView;
 import dev.turtywurty.mysticfactories.world.biome.Biome;
 import dev.turtywurty.mysticfactories.world.biome.source.BiomeSource;
 import dev.turtywurty.mysticfactories.world.biome.source.MultiNoiseBiomeSource;
@@ -51,7 +50,7 @@ public class OverworldWorldGenerator extends WorldGenerator {
 
     private static BiomeSource createBiomeSource(long seed) {
         return new MultiNoiseBiomeSource(seed, List.of(
-                Biomes.OVERWORLD,
+                Biomes.OVERWORLD_PLAINS,
                 Biomes.OVERWORLD_HILLS,
                 Biomes.OVERWORLD_COAST,
                 Biomes.OCEAN

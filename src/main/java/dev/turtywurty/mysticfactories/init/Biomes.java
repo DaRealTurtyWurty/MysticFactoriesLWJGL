@@ -16,8 +16,8 @@ import java.util.Optional;
 
 @RegistryHolder
 public class Biomes {
-    public static final Biome OVERWORLD = register("overworld",
-            Biome.builder(Identifier.of("overworld"))
+    public static final Biome OVERWORLD_PLAINS = register("overworld_plains",
+            Biome.builder(Identifier.of("overworld_plains"))
                     .climateProfile(new ClimateProfile.Builder()
                             .temperature(0.65f)
                             .humidity(0.55f)
