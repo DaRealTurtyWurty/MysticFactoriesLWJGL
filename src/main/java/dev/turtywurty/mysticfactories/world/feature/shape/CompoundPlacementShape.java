@@ -1,6 +1,6 @@
-package dev.turtywurty.mysticfactories.world.biome.feature.shape;
+package dev.turtywurty.mysticfactories.world.feature.shape;
 
-import dev.turtywurty.mysticfactories.world.World;
+import dev.turtywurty.mysticfactories.world.WorldView;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class CompoundPlacementShape implements PlacementShape {
     }
 
     @Override
-    public List<TilePos> getPositions(World world, Random random, int chunkX, int chunkY, int attempts) {
+    public List<TilePos> getPositions(WorldView world, Random random, int chunkX, int chunkY, int attempts) {
         List<TilePos> positions = new ArrayList<>();
         for (PlacementShape shape : shapes) {
             positions.addAll(shape.getPositions(world, random, chunkX, chunkY, attempts));

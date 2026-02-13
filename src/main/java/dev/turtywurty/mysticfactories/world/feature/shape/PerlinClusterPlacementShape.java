@@ -1,7 +1,7 @@
-package dev.turtywurty.mysticfactories.world.biome.feature.shape;
+package dev.turtywurty.mysticfactories.world.feature.shape;
 
 import dev.turtywurty.mysticfactories.world.ChunkPos;
-import dev.turtywurty.mysticfactories.world.World;
+import dev.turtywurty.mysticfactories.world.WorldView;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
 import personthecat.fastnoise.FastNoise;
 import personthecat.fastnoise.data.NoiseType;
@@ -28,7 +28,7 @@ public class PerlinClusterPlacementShape implements PlacementShape {
     }
 
     @Override
-    public List<TilePos> getPositions(World world, Random random, int chunkX, int chunkY, int attempts) {
+    public List<TilePos> getPositions(WorldView world, Random random, int chunkX, int chunkY, int attempts) {
         List<TilePos> positions = new ArrayList<>();
         int baseX = chunkX * ChunkPos.SIZE;
         int baseY = chunkY * ChunkPos.SIZE;

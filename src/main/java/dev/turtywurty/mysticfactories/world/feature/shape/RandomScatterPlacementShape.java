@@ -1,7 +1,7 @@
-package dev.turtywurty.mysticfactories.world.biome.feature.shape;
+package dev.turtywurty.mysticfactories.world.feature.shape;
 
 import dev.turtywurty.mysticfactories.world.ChunkPos;
-import dev.turtywurty.mysticfactories.world.World;
+import dev.turtywurty.mysticfactories.world.WorldView;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
 
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.Random;
 
 public class RandomScatterPlacementShape implements PlacementShape {
     @Override
-    public List<TilePos> getPositions(World world, Random random, int chunkX, int chunkY, int attempts) {
+    public List<TilePos> getPositions(WorldView world, Random random, int chunkX, int chunkY, int attempts) {
         List<TilePos> positions = new ArrayList<>();
         for (int i = 0; i < attempts; i++) {
             int x = chunkX * ChunkPos.SIZE + random.nextInt(ChunkPos.SIZE);

@@ -18,12 +18,17 @@ public class PlayerEntity extends LivingEntity {
 
     @Override
     public AABB getAABB() {
-        return null;
+        return new AABB(getPosition().x, getPosition().y, getPosition().x + 1, getPosition().y + 1);
     }
 
     @Override
     public void tick(double delta) {
 
+    }
+
+    @Override
+    public boolean shouldCollideWithTiles() {
+        return false;
     }
 
     @Override

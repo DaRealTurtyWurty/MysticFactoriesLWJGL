@@ -1,6 +1,7 @@
 package dev.turtywurty.mysticfactories.world.entity.impl;
 
 import dev.turtywurty.mysticfactories.world.World;
+import dev.turtywurty.mysticfactories.world.entity.DamageSource;
 import dev.turtywurty.mysticfactories.world.entity.Entity;
 import dev.turtywurty.mysticfactories.world.entity.EntityType;
 import dev.turtywurty.mysticfactories.world.entity.RemovalReason;
@@ -13,12 +14,17 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class LivingEntity extends Entity {
     @Getter
     protected final AttributeMap attributes;
     protected boolean noAI = false;
     @Getter
     protected float health;
+
+    private final Map<DamageSource, Long> damageSourceCooldowns = new HashMap<>();
 
     public LivingEntity(@NotNull EntityType<? extends LivingEntity> type) {
         super(type);
@@ -43,6 +49,11 @@ public abstract class LivingEntity extends Entity {
     }
 
     @Override
+    public final void baseTick(double delta) {
+        super.baseTick(delta);
+    }
+
+    @Override
     public void onAddedToWorld() {
         this.health = this.attributes.getFloat(AttributeKeys.MAX_HEALTH);
     }
@@ -51,7 +62,7 @@ public abstract class LivingEntity extends Entity {
     public void onRemovedFromWorld(World world, RemovalReason reason) {
     }
 
-    public void onDeath() {
+    public void onDeath(DamageSource source) {
         remove(RemovalReason.KILLED);
     }
 
@@ -59,13 +70,21 @@ public abstract class LivingEntity extends Entity {
         this.health = Math.min(this.health + amount, this.attributes.getFloat(AttributeKeys.MAX_HEALTH));
     }
 
-    public void damage(float amount) {
+    public void damage(@NotNull DamageSource source, float amount) {
+        if (source == null || amount <= 0)
+            return;
+
+        long currentTime = System.currentTimeMillis();
+        if (damageSourceCooldowns.containsKey(source) && currentTime < damageSourceCooldowns.get(source))
+            return;
+
+        damageSourceCooldowns.put(source, currentTime + source.getCooldownMs());
         this.health = Math.max(this.health - amount, 0);
 
         boolean died = this.health <= 0;
-        onHurt(amount, died);
+        onHurt(source, amount, died);
         if (died) {
-            onDeath();
+            onDeath(source);
         }
     }
 
@@ -81,20 +100,24 @@ public abstract class LivingEntity extends Entity {
         return this.attributes.get(key).getBaseValue();
     }
 
-    public void onHurt(float amount, boolean died) {
+    public void onHurt(DamageSource source, float amount, boolean died) {
     }
 
     public abstract AttributeMap.Builder createAttributes();
 
     @Override
     public void writeData(EntityDataWriter<?> writer) {
+        super.writeData(writer);
         writer.writeBoolean("NoAI", this.noAI);
         writer.write("Attributes", this.attributes.codec(), this.attributes);
+        writer.writeFloat("Health", this.health);
     }
 
     @Override
     public void readData(EntityDataReader<?> reader) {
+        super.readData(reader);
         this.noAI = reader.readBooleanOrDefault("NoAI", false);
         reader.readOptional("Attributes", this.attributes.codec()).ifPresent(this.attributes::copyFrom);
+        this.health = reader.readFloatOrDefault("Health", this.attributes.getFloat(AttributeKeys.MAX_HEALTH));
     }
 }

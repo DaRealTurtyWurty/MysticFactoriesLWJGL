@@ -1,11 +1,12 @@
-package dev.turtywurty.mysticfactories.world.biome.feature.shape;
+package dev.turtywurty.mysticfactories.world.feature.shape;
 
 import dev.turtywurty.mysticfactories.util.Direction;
 import dev.turtywurty.mysticfactories.world.Chunk;
 import dev.turtywurty.mysticfactories.world.ChunkPos;
-import dev.turtywurty.mysticfactories.world.World;
+import dev.turtywurty.mysticfactories.world.WorldView;
 import dev.turtywurty.mysticfactories.world.biome.IntProvider;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +23,7 @@ public class RandomWalkPlacementShape implements PlacementShape {
     }
 
     @Override
-    public List<TilePos> getPositions(World world, Random random, int chunkX, int chunkY, int attempts) {
+    public List<TilePos> getPositions(@MonotonicNonNull WorldView world, Random random, int chunkX, int chunkY, int attempts) {
         Chunk chunk = world.getChunk(chunkX, chunkY).orElse(null);
         if (chunk == null)
             return Collections.emptyList();

@@ -14,6 +14,8 @@ public class Camera {
     private final float orthoNear, orthoFar;
     @Setter
     private Entity followTarget;
+    @Setter
+    private float followTargetScale = 1.0f;
     @Getter
     private float orthoLeft;
     @Getter
@@ -85,7 +87,7 @@ public class Camera {
     private void updateFollowTarget() {
         if (this.followTarget != null) {
             var pos = this.followTarget.getPosition();
-            this.position.set((float) pos.x, (float) pos.y);
+            this.position.set((float) (pos.x * this.followTargetScale), (float) (pos.y * this.followTargetScale));
         }
     }
 

@@ -2,7 +2,7 @@ package dev.turtywurty.mysticfactories.world.biome;
 
 import dev.turtywurty.mysticfactories.util.Identifier;
 import dev.turtywurty.mysticfactories.util.registry.Registerable;
-import dev.turtywurty.mysticfactories.world.biome.feature.FeatureRule;
+import dev.turtywurty.mysticfactories.world.feature.FeatureRule;
 import dev.turtywurty.mysticfactories.world.biome.spawning.EntitySpawnRule;
 import dev.turtywurty.mysticfactories.world.biome.surface.SurfaceProfile;
 import lombok.EqualsAndHashCode;

@@ -4,10 +4,13 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapLike;
+import dev.turtywurty.mysticfactories.util.Codecs;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -166,6 +169,27 @@ public class EntityDataReader<T> {
 
     public Optional<String> readOptionalString(String key) {
         return readOptional(key, Codec.STRING);
+    }
+
+    public UUID readUuid(String key) {
+        return readOrThrow(key, Codecs.UUID);
+    }
+
+    public UUID readUuidOrDefault(String key, UUID defaultValue) {
+        return readOrDefault(key, Codecs.UUID, defaultValue);
+    }
+
+    public Optional<UUID> readOptionalUuid(String key) {
+        return readOptional(key, Codecs.UUID);
+    }
+
+    /**
+     * Reads a value and spreads the result into the provided consumer if successful, otherwise throws an exception.
+     */
+    public <V> void readAndConsume(String key, Codec<V> codec, Consumer<V> consumer) {
+        read(key, codec).ifSuccess(consumer).ifError(error -> {
+            throw asError("Failed to decode field '" + key + "'").apply(error.message());
+        });
     }
 
     private Function<String, RuntimeException> asError(String prefix) {

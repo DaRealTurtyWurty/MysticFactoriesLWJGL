@@ -6,8 +6,13 @@ import dev.turtywurty.mysticfactories.util.registry.RegistryHolder;
 import dev.turtywurty.mysticfactories.world.biome.Biome;
 import dev.turtywurty.mysticfactories.world.biome.ClimateProfile;
 import dev.turtywurty.mysticfactories.world.biome.FloatProvider;
+import dev.turtywurty.mysticfactories.world.biome.IntProvider;
 import dev.turtywurty.mysticfactories.world.biome.surface.SurfaceProfile;
 import dev.turtywurty.mysticfactories.world.biome.surface.SurfaceRule;
+import dev.turtywurty.mysticfactories.world.feature.FeatureRule;
+import dev.turtywurty.mysticfactories.world.feature.shape.RandomScatterPlacementShape;
+
+import java.util.Optional;
 
 @RegistryHolder
 public class Biomes {
@@ -97,6 +102,14 @@ public class Biomes {
                                     .addCondition(SurfaceRule.noiseBelow(0.25f))
                                     .build())
                             .build())
+                    .addFeatureRule(new FeatureRule(
+                            Features.CACTUS.getId(),
+                            64,
+                            IntProvider.constant(1),
+                            new RandomScatterPlacementShape(),
+                            (world, pos) -> world.getTile(pos).orElse(null) == TileTypes.SAND
+                                    && world.getTileEntity(pos).isEmpty(),
+                            Optional.empty()))
                     .build());
 
     public static final Biome OCEAN = register("ocean",

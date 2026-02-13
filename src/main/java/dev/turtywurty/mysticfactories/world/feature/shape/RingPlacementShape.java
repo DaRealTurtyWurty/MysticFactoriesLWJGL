@@ -1,7 +1,7 @@
-package dev.turtywurty.mysticfactories.world.biome.feature.shape;
+package dev.turtywurty.mysticfactories.world.feature.shape;
 
 import dev.turtywurty.mysticfactories.world.ChunkPos;
-import dev.turtywurty.mysticfactories.world.World;
+import dev.turtywurty.mysticfactories.world.WorldView;
 import dev.turtywurty.mysticfactories.world.biome.IntProvider;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
 
@@ -17,7 +17,7 @@ public class RingPlacementShape implements PlacementShape {
     }
 
     @Override
-    public List<TilePos> getPositions(World world, Random random, int chunkX, int chunkY, int attempts) {
+    public List<TilePos> getPositions(WorldView world, Random random, int chunkX, int chunkY, int attempts) {
         List<TilePos> positions = new ArrayList<>();
         int centerX = chunkX * ChunkPos.SIZE + ChunkPos.HALF_SIZE;
         int centerY = chunkY * ChunkPos.SIZE + ChunkPos.HALF_SIZE;

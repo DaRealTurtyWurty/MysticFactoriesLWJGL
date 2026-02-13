@@ -11,6 +11,7 @@ import dev.turtywurty.mysticfactories.world.ChunkPos;
 import dev.turtywurty.mysticfactories.world.entity.Entity;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
 import dev.turtywurty.mysticfactories.world.tile.TileType;
+import dev.turtywurty.mysticfactories.world.tileentity.StackedTileEntity;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
@@ -66,8 +67,10 @@ public class WorldRenderer {
     @SuppressWarnings("unchecked")
     private <T extends Entity> void renderEntity(EntityRenderContext context, T entity) {
         EntityRenderer<T> renderer = (EntityRenderer<T>) this.entityRendererRegistry.getRendererFor(entity.getType());
-        if (renderer == null)
-            return;
+        if (renderer == null) {
+            throw new IllegalStateException("No renderer registered for entity type '" + entity.getType().getId()
+                    + "' (entity class: " + entity.getClass().getName() + ")");
+        }
 
         renderer.render(context, entity, this.modelMatrix);
     }
@@ -83,9 +86,15 @@ public class WorldRenderer {
 
         for (Entity entity : world.getEntities()) {
             var pos = entity.getPosition();
-            float x = (float) pos.x;
-            float y = (float) pos.y;
-            if (x < viewLeft || x > viewRight || y < viewBottom || y > viewTop)
+            float x = (float) (pos.x * tileSize);
+            float y = (float) (pos.y * tileSize);
+            float minY = y;
+            float maxY = y;
+            if (entity instanceof StackedTileEntity stacked && stacked.size() > 1) {
+                maxY = y + ((stacked.size() - 1) * tileSize);
+            }
+
+            if (x < viewLeft || x > viewRight || maxY < viewBottom || minY > viewTop)
                 continue;
 
             renderEntity(context, entity);

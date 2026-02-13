@@ -10,16 +10,15 @@ import dev.turtywurty.mysticfactories.world.entity.impl.PlayerEntity;
 @RegistryHolder
 public class EntityTypes {
     public static final EntityType<PlayerEntity> PLAYER = register("player",
-            EntityType.<PlayerEntity>builder()
+            EntityType.builder(PlayerEntity.class)
                     .factory((type, world) -> new PlayerEntity(world))
-                    .shouldTick(true)
-                    .build());
+                    .shouldTick(true));
 
     private EntityTypes() {
     }
 
-    public static <T extends Entity> EntityType<T> register(String name, EntityType<T> entityType) {
+    public static <T extends Entity, B extends EntityType.Builder<T, B>> EntityType<T> register(String name, B entityType) {
         Identifier id = Identifier.of(name);
-        return Registries.ENTITY_TYPES.register(id, entityType);
+        return Registries.ENTITY_TYPES.register(id, entityType.build());
     }
 }

@@ -3,6 +3,7 @@ package dev.turtywurty.mysticfactories.world.tile;
 import dev.turtywurty.mysticfactories.util.Direction;
 import dev.turtywurty.mysticfactories.world.ChunkPos;
 import lombok.ToString;
+import org.joml.Vector2d;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
@@ -18,6 +19,10 @@ public class TilePos extends Vector2i {
 
     public static TilePos fromVector2i(Vector2i vec) {
         return new TilePos(vec.x, vec.y);
+    }
+
+    public static TilePos fromVector2d(Vector2d vec) {
+        return new TilePos((int) Math.floor(vec.x), (int) Math.floor(vec.y));
     }
 
     public static TilePos fromLong(long packed) {

@@ -21,6 +21,8 @@
         </rollingPolicy>
     </appender>
 
+    <logger name="dev.turtywurty.mysticfactories.world.gen.impl.OverworldWorldGenerator" level="debug" />
+
     <root level="info">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />

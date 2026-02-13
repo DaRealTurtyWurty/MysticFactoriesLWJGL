@@ -4,10 +4,12 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.RecordBuilder;
+import dev.turtywurty.mysticfactories.util.Codecs;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
 /**
@@ -66,6 +68,10 @@ public class EntityDataWriter<T> {
 
     public EntityDataWriter<T> writeDouble(String key, double value) {
         return write(key, Codec.DOUBLE, value);
+    }
+
+    public EntityDataWriter<T> writeUuid(String key, UUID value) {
+        return write(key, Codecs.UUID, value);
     }
 
     public EntityDataWriter<T> writeString(String key, String value) {

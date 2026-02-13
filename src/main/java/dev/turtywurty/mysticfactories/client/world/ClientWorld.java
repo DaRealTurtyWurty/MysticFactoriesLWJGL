@@ -4,7 +4,6 @@ import dev.turtywurty.mysticfactories.world.*;
 import dev.turtywurty.mysticfactories.world.entity.Entity;
 import lombok.Setter;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,9 +15,16 @@ public class ClientWorld extends World {
         super(worldType, new WorldData(seed));
     }
 
-    public void applyFullState(Map<ChunkPos, Chunk> chunks) {
+    public void applyFullState(WorldSnapshot snapshot) {
         this.chunks.clear();
-        this.chunks.putAll(chunks);
+        this.chunks.putAll(snapshot.chunks());
+    }
+
+    public void clearEntities() {
+        this.entities.clear();
+        this.tickingEntities.clear();
+        this.pendingEntityRemovals.clear();
+        this.localPlayerId = null;
     }
 
     public float getTileSize() {
@@ -42,6 +48,7 @@ public class ClientWorld extends World {
 
     @Override
     public void tick(double delta) {
+        processPendingEntityRemovals();
         // Client-side effects or interpolation could go here later.
     }
 }

@@ -5,6 +5,7 @@ import dev.turtywurty.mysticfactories.world.WorldType;
 import dev.turtywurty.mysticfactories.world.biome.Biome;
 import dev.turtywurty.mysticfactories.world.entity.Entity;
 import dev.turtywurty.mysticfactories.world.entity.EntityType;
+import dev.turtywurty.mysticfactories.world.feature.Feature;
 import dev.turtywurty.mysticfactories.world.gen.WorldGeneratorType;
 import dev.turtywurty.mysticfactories.world.tile.TileType;
 
@@ -19,6 +20,7 @@ public class Registries {
     public static final Registry<WorldType> WORLD_TYPES = createRegistry(RegistryKeys.WORLD_TYPES, Identifier.of("default")); // TODO: Replace with actual default ID
     public static final Registry<WorldGeneratorType> WORLD_GENERATORS = createRegistry(RegistryKeys.WORLD_GENERATORS, Identifier.of("default")); // TODO: Replace with actual default ID
     public static final Registry<Biome> BIOMES = createRegistry(RegistryKeys.BIOMES, Identifier.of("default")); // TODO: Replace with actual default ID
+    public static final Registry<Feature> FEATURES = createRegistry(RegistryKeys.FEATURES, Identifier.of("default")); // TODO: Replace with actual default ID
 
     public static <T extends Registerable> Registry<T> createRegistry(RegistryKey<T> key, Identifier defaultId) {
         Registry<T> registry = new DefaultedRegistry<>(defaultId);

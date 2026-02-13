@@ -2,6 +2,7 @@ package dev.turtywurty.mysticfactories.client.input;
 
 import dev.turtywurty.mysticfactories.client.world.ClientWorld;
 import dev.turtywurty.mysticfactories.world.entity.impl.PlayerEntity;
+import dev.turtywurty.mysticfactories.world.physics.CollisionResolver;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Optional;
@@ -34,9 +35,7 @@ public record PlayerInputController(ClientWorld world) implements InputListener 
             dy *= invSqrt2;
         }
 
-        double worldUnitsPerSecond = movementSpeedTilesPerSecond * world.getTileSize();
-
-        player.getVelocity().set(dx * worldUnitsPerSecond, dy * worldUnitsPerSecond);
-        player.getPosition().fma(deltaTime, player.getVelocity());
+        player.getVelocity().set(dx * movementSpeedTilesPerSecond, dy * movementSpeedTilesPerSecond);
+        CollisionResolver.moveEntity(world, player, deltaTime);
     }
 }

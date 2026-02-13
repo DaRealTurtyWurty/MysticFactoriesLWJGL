@@ -7,6 +7,7 @@ import dev.turtywurty.mysticfactories.client.render.GameRenderer;
 import dev.turtywurty.mysticfactories.client.render.world.WorldRenderer;
 import dev.turtywurty.mysticfactories.client.render.world.entity.BasicEntityRenderer;
 import dev.turtywurty.mysticfactories.client.render.world.entity.EntityRendererRegistry;
+import dev.turtywurty.mysticfactories.client.render.world.entity.StackedTileEntityRenderer;
 import dev.turtywurty.mysticfactories.client.settings.Settings;
 import dev.turtywurty.mysticfactories.client.text.Fonts;
 import dev.turtywurty.mysticfactories.client.ui.GUI;
@@ -20,6 +21,7 @@ import dev.turtywurty.mysticfactories.client.window.Window;
 import dev.turtywurty.mysticfactories.client.world.ClientWorld;
 import dev.turtywurty.mysticfactories.client.world.LocalWorldConnection;
 import dev.turtywurty.mysticfactories.init.EntityTypes;
+import dev.turtywurty.mysticfactories.init.TileEntityTypes;
 import dev.turtywurty.mysticfactories.init.WorldTypes;
 import dev.turtywurty.mysticfactories.server.IntegratedServer;
 import dev.turtywurty.mysticfactories.server.ServerWorld;
@@ -90,6 +92,7 @@ public class GameClient implements Runnable {
         var lifecycle = new RegistryLifecycle();
         lifecycle.add(RegistryKeys.TILE_TYPES);
         lifecycle.add(RegistryKeys.ENTITY_TYPES);
+        lifecycle.add(RegistryKeys.FEATURES);
         lifecycle.add(RegistryKeys.WORLD_GENERATORS);
         lifecycle.add(RegistryKeys.BIOMES);
         lifecycle.add(RegistryKeys.WORLD_TYPES);
@@ -249,6 +252,8 @@ public class GameClient implements Runnable {
     private void completeWorldLoad(WorldLoadResult result) {
         var entityRendererRegistry = new EntityRendererRegistry();
         entityRendererRegistry.registerRenderer(EntityTypes.PLAYER, new BasicEntityRenderer<>(EntityTypes.PLAYER.getId(), 16.0f));
+        entityRendererRegistry.registerRenderer(TileEntityTypes.CACTUS, new BasicEntityRenderer<>(TileEntityTypes.CACTUS.getId(), 16.0f));
+        entityRendererRegistry.registerRenderer(TileEntityTypes.STACKED, new StackedTileEntityRenderer(entityRendererRegistry));
         this.worldRenderer = new WorldRenderer(entityRendererRegistry);
 
         this.integratedServer = result.integratedServer();
@@ -258,13 +263,14 @@ public class GameClient implements Runnable {
         // Local world connection forwards updates to the client
         var connection = new LocalWorldConnection(this.clientWorld);
         overworld.setConnection(connection);
-        connection.sendFullState(WorldTypes.OVERWORLD, overworld.getChunks());
+        connection.sendFullState(WorldTypes.OVERWORLD, overworld.createSnapshot());
 
         // Spawn a local player and bind it
         var player = EntityTypes.PLAYER.create(overworld);
         overworld.addEntity(player);
         connection.sendEntitySpawn(WorldTypes.OVERWORLD, player);
         connection.sendPlayerBind(WorldTypes.OVERWORLD, player.getUuid());
+        this.camera.setFollowTargetScale(this.clientWorld.getTileSize());
         this.clientWorld.getLocalPlayer().ifPresent(this.camera::setFollowTarget);
         this.inputManager.addListener(new PlayerInputController(this.clientWorld));
 
@@ -290,10 +296,9 @@ public class GameClient implements Runnable {
                                 return "Biome: unknown";
 
                             Vector2d pos = localPlayerOpt.get().getPosition();
-                            float tileSize = this.clientWorld.getTileSize();
                             var tilePos = new TilePos(
-                                    (int) Math.floor(pos.x / tileSize),
-                                    (int) Math.floor(pos.y / tileSize));
+                                    (int) Math.floor(pos.x),
+                                    (int) Math.floor(pos.y));
                             return this.clientWorld.getBiome(tilePos)
                                     .map(biome -> "Biome: " + biome.getId())
                                     .orElse("Biome: unknown");

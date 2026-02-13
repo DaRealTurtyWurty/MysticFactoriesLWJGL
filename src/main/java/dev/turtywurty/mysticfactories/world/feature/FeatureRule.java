@@ -1,12 +1,12 @@
-package dev.turtywurty.mysticfactories.world.biome.feature;
+package dev.turtywurty.mysticfactories.world.feature;
 
 import dev.turtywurty.mysticfactories.util.Identifier;
 import dev.turtywurty.mysticfactories.world.biome.IntProvider;
-import dev.turtywurty.mysticfactories.world.biome.feature.shape.PlacementShape;
+import dev.turtywurty.mysticfactories.world.feature.shape.PlacementShape;
 
 import java.util.Optional;
 
-public record FeatureRule(Identifier featureId, float attemptsPerChunk, IntProvider countProvider,
+public record FeatureRule(Identifier featureId, int attemptsPerChunk, IntProvider countProvider,
                           PlacementShape placementShape, PlacementCondition placementCondition,
                           Optional<DensityModifier> densityModifier) {
 }

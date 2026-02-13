@@ -1,4 +1,4 @@
-package dev.turtywurty.mysticfactories.world.biome.feature;
+package dev.turtywurty.mysticfactories.world.feature;
 
 public record DensityModifier(float noiseScale, float noiseThreshold, float adjustment) {
     public static class Builder {

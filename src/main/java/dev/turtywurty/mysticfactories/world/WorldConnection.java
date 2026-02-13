@@ -4,7 +4,6 @@ import dev.turtywurty.mysticfactories.world.entity.Entity;
 import dev.turtywurty.mysticfactories.world.tile.TilePos;
 import dev.turtywurty.mysticfactories.world.tile.TileType;
 
-import java.util.Map;
 import java.util.UUID;
 
 public interface WorldConnection {
@@ -16,7 +15,7 @@ public interface WorldConnection {
     /**
      * Sends the initial full state (or a resync) to the client world.
      */
-    void sendFullState(WorldType worldType, Map<ChunkPos, Chunk> chunks);
+    void sendFullState(WorldType worldType, WorldSnapshot snapshot);
 
     /**
      * Sends an entity spawn to the client.
